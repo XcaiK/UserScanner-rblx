@@ -1,140 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Username Scanner</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <title>Verify you're human</title>
     <style>
-        [x-cloak] { display: none !important; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .captcha-box {
+            background: #16213e;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 2px solid #0f3460;
+        }
+        .captcha-img {
+            background: #2a3a5c;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 32px;
+            letter-spacing: 10px;
+            font-family: monospace;
+            margin: 20px 0;
+            color: #a8d8ea;
+        }
+        input {
+            padding: 12px;
+            width: 80%;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+        }
+        button {
+            margin-top: 15px;
+            padding: 12px 40px;
+            background: #e94560;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #c73a54;
+        }
+        .counter {
+            font-size: 14px;
+            color: #888;
+            margin-top: 15px;
+        }
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: #f5a623;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
+<body>
 
-    <div x-data="scanner()" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-        
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-                BloxCheck
-            </h1>
-            <p class="text-xs text-slate-400 mt-1">Instant Roblox username availability tool</p>
-        </div>
+    <div class="captcha-box" id="captchaBox">
+        <h2>🔒 Verify you're human</h2>
+        <p style="color:#aaa; font-size:14px;">Complete all CAPTCHAs to continue</p>
 
-        <form @submit.prevent="scanUser" class="space-y-4">
-            <div>
-                <input 
-                    type="text" 
-                    x-model="username" 
-                    placeholder="Enter Roblox username..." 
-                    class="w-full px-5 py-3.5 bg-slate-950 border border-slate-800 rounded-2xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-white placeholder-slate-500 transition-all text-sm font-medium"
-                    required
-                >
-            </div>
-            <button 
-                type="submit" 
-                class="w-full py-3.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 active:scale-[0.98] text-white font-semibold rounded-2xl shadow-lg shadow-blue-500/20 transition-all text-sm flex items-center justify-center gap-2"
-                :disabled="loading"
-            >
-                <span x-show="!loading">Scan Username</span>
-                <span x-show="loading" class="flex items-center gap-2">
-                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Checking...
-                </span>
-            </button>
-        </form>
+        <div class="captcha-img" id="captchaText">A7K2</div>
 
-        <div x-show="loading" x-cloak class="mt-8 space-y-4 animate-pulse">
-            <div class="h-12 bg-slate-800 rounded-2xl w-full"></div>
-            <div class="h-16 bg-slate-800 rounded-2xl w-full"></div>
-        </div>
+        <input type="text" id="userInput" placeholder="Type the code above" autofocus>
 
-        <div 
-            x-show="result && !loading" 
-            x-cloak 
-            x-transition:enter="transition ease-out duration-300 transform opacity-0 scale-95"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            class="mt-8 space-y-4"
-        >
-            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Availability</p>
-                    <p class="text-base font-bold mt-0.5" x-text="result.message"></p>
-                </div>
-                <span 
-                    class="px-3 py-1 text-xs font-bold rounded-full"
-                    :class="result.available ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
-                    x-text="result.available ? 'Available' : 'Taken'"
-                ></span>
-            </div>
+        <button onclick="checkCaptcha()">✔ Verify</button>
 
-            <div x-show="!result.available && result.userId" class="p-4 rounded-2xl bg-slate-950 border border-slate-800">
-                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">User ID</p>
-                <p class="text-sm font-mono text-indigo-400 mt-0.5" x-text="result.userId"></p>
-            </div>
-        </div>
-
+        <div class="counter" id="counter">Attempt 1 / 100</div>
+        <div class="loading" id="loading">⏳ Verifying...</div>
     </div>
 
     <script>
-        function scanner() {
-            return {
-                username: '',
-                loading: false,
-                result: null,
-                
-                async scanUser() {
-                    if (!this.username.trim()) return;
-                    this.loading = true;
-                    this.result = null;
+        let attempts = 0;
+        const maxAttempts = 100;
+        const captchaBox = document.getElementById('captchaBox');
+        const counter = document.getElementById('counter');
+        const loading = document.getElementById('loading');
+        const userInput = document.getElementById('userInput');
+        const captchaDisplay = document.getElementById('captchaText');
 
-                    try {
-                        // Using a public CORS proxy to let standard HTML read the Roblox endpoint safely
-                        const targetUrl = 'https://users.roblox.com/v1/usernames/users';
-                        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-                        
-                        const response = await fetch(proxyUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            // Roblox expects an array of usernames to check
-                            body: JSON.stringify({ usernames: [this.username], excludeBannedUsers: false })
-                        });
-                        
-                        // AllOrigins wraps the true data inside a stringified .contents object
-                        const wrappedData = await response.json();
-                        const data = JSON.parse(wrappedData.contents);
-                        
-                        if (data.data && data.data.length > 0) {
-                            const account = data.data[0];
-                            this.result = {
-                                available: false,
-                                message: 'This name is taken',
-                                userId: account.id
-                            };
-                        } else {
-                            this.result = {
-                                available: true,
-                                message: 'Name is completely free!',
-                                userId: null
-                            };
-                        }
-                    } catch (error) {
-                        console.error(error);
-                        this.result = {
-                            available: false,
-                            message: 'Error connecting to scan network.',
-                            userId: null
-                        };
-                    }
-                    
-                    this.loading = false;
+        // Generate random 4-char CAPTCHA
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 4; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        let currentCaptcha = generateCaptcha();
+        captchaDisplay.textContent = currentCaptcha;
+
+        function checkCaptcha() {
+            const userText = userInput.value.trim().toUpperCase();
+
+            if (userText === currentCaptcha) {
+                // Correct — increment and check
+                attempts++;
+
+                if (attempts >= maxAttempts) {
+                    // FINAL: close tab
+                    window.close();
+                    // Fallback if close fails
+                    document.body.innerHTML = '<h1 style="color:white;margin-top:100px;">✅ Verified!<br><small>(Tab will close now...)</small></h1>';
+                    setTimeout(() => window.close(), 500);
+                    return;
                 }
+
+                // Show loading flicker
+                loading.style.display = 'block';
+                counter.textContent = `Attempt ${attempts + 1} / ${maxAttempts}`;
+                userInput.value = '';
+                userInput.disabled = true;
+
+                setTimeout(() => {
+                    // Generate new CAPTCHA
+                    currentCaptcha = generateCaptcha();
+                    captchaDisplay.textContent = currentCaptcha;
+                    loading.style.display = 'none';
+                    userInput.disabled = false;
+                    userInput.focus();
+                }, 800);
+
+            } else {
+                // Wrong — shake effect
+                captchaBox.style.borderColor = '#e94560';
+                userInput.value = '';
+                userInput.placeholder = '❌ Wrong, try again';
+                setTimeout(() => {
+                    captchaBox.style.borderColor = '#0f3460';
+                    userInput.placeholder = 'Type the code above';
+                }, 1000);
             }
         }
+
+        // Enter key support
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') checkCaptcha();
+        });
+
+        // Prevent right-click / inspect (just for fun)
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
+
 </body>
 </html>
