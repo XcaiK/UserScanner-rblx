@@ -2,93 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>👻 The Dark Maze — Find the Keys</title>
   <style>
-    * { margin: 0; padding: 0; overflow: hidden; }
-    body { background: #000; font-family: 'Segoe UI', system-ui, sans-serif; }
-    canvas { display: block; }
+    * { margin: 0; padding: 0; overflow: hidden; touch-action: none; }
+    body { background: #000; font-family: 'Segoe UI', system-ui, sans-serif; touch-action: none; }
+    canvas { display: block; touch-action: none; }
+    
     #ui {
       position: fixed;
-      top: 20px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
       color: #fff;
-      background: rgba(0,0,0,0.7);
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-size: 18px;
+      background: rgba(0,0,0,0.75);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
       z-index: 10;
       text-align: center;
       border: 1px solid #333;
       pointer-events: none;
       backdrop-filter: blur(4px);
       font-weight: bold;
-      letter-spacing: 1px;
+      white-space: nowrap;
     }
     #ui span { color: #ffcc00; }
+
     #keys-display {
       position: fixed;
-      bottom: 30px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       color: #fff;
       background: rgba(0,0,0,0.8);
-      padding: 14px 28px;
-      border-radius: 16px;
-      font-size: 22px;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 16px;
       z-index: 10;
       border: 1px solid #444;
       backdrop-filter: blur(4px);
       font-weight: bold;
       display: flex;
-      gap: 20px;
+      gap: 12px;
       align-items: center;
-      letter-spacing: 2px;
+      pointer-events: none;
+      white-space: nowrap;
     }
-    #keys-display .key-icon {
-      color: #ffcc00;
-      font-size: 28px;
-    }
-    #keys-display .count {
-      color: #ffcc00;
-    }
+    #keys-display .key-icon { color: #ffcc00; font-size: 22px; }
+    #keys-display .count { color: #ffcc00; }
+    #door-status.locked { color: #ff4444; }
+    #door-status.unlocked { color: #66ff66; }
+
     #crosshair {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: rgba(255,255,255,0.3);
-      font-size: 30px;
+      color: rgba(255,255,255,0.25);
+      font-size: 28px;
       z-index: 5;
       pointer-events: none;
       font-family: monospace;
     }
+
+    /* ---- MOBILE CONTROLS ---- */
+    #touch-zone {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      touch-action: none;
+      display: none; /* hidden by default, shown on mobile */
+    }
+
+    /* Joystick container */
+    #joystick-area {
+      position: fixed;
+      bottom: 90px;
+      left: 30px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.15);
+      z-index: 15;
+      touch-action: none;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+    #joystick-knob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transform: translate(-50%, -50%);
+      touch-action: none;
+      border: 2px solid rgba(255,255,255,0.2);
+      pointer-events: none;
+    }
+
+    /* Look drag area (right side) */
+    #look-area {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 60%;
+      height: 100%;
+      z-index: 3;
+      touch-action: none;
+      display: none;
+      background: transparent;
+    }
+
+    /* Mobile action button (jump / interact) */
+    #action-btn {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,200,0,0.2);
+      border: 2px solid rgba(255,200,0,0.3);
+      color: #ffcc00;
+      font-size: 28px;
+      z-index: 15;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      touch-action: none;
+      backdrop-filter: blur(4px);
+      font-weight: bold;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #action-btn:active {
+      background: rgba(255,200,0,0.4);
+      transform: scale(0.92);
+    }
+
+    /* Controls hint */
+    #controls-hint {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #444;
+      font-size: 12px;
+      z-index: 5;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 14px;
+      border-radius: 20px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #controls-hint.mobile {
+      display: none;
+    }
+
+    /* Win / Lose screens */
     #win-screen, #lose-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       display: none;
       justify-content: center;
       align-items: center;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.88);
       z-index: 100;
       flex-direction: column;
       backdrop-filter: blur(8px);
+      padding: 20px;
     }
     #win-screen h1, #lose-screen h1 {
       color: #ffcc00;
-      font-size: 64px;
+      font-size: clamp(40px, 10vw, 64px);
       margin-bottom: 10px;
       text-shadow: 0 0 40px #ffcc0044;
+      text-align: center;
     }
     #win-screen p, #lose-screen p {
       color: #aaa;
-      font-size: 22px;
+      font-size: clamp(16px, 4vw, 22px);
       margin-bottom: 20px;
+      text-align: center;
     }
     #win-screen button, #lose-screen button {
       padding: 14px 40px;
-      font-size: 20px;
+      font-size: clamp(16px, 4vw, 20px);
       border: none;
       border-radius: 12px;
       background: #ffcc00;
@@ -96,46 +202,113 @@
       font-weight: bold;
       cursor: pointer;
       transition: 0.2s;
+      touch-action: manipulation;
     }
-    #win-screen button:hover, #lose-screen button:hover {
-      transform: scale(1.05);
-      background: #ffe066;
+    #win-screen button:active, #lose-screen button:active {
+      transform: scale(0.95);
     }
-    #controls-hint {
+
+    .toast {
       position: fixed;
-      bottom: 100px;
+      top: 70px;
       left: 50%;
       transform: translateX(-50%);
-      color: #444;
-      font-size: 13px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: clamp(14px, 3vw, 18px);
+      z-index: 50;
+      border-left: 4px solid #ffcc00;
+      backdrop-filter: blur(4px);
+      font-weight: bold;
+      animation: fadeUp 0.3s ease;
+      pointer-events: none;
+      text-align: center;
+      max-width: 90%;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Desktop-only: click to lock */
+    #click-hint {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #666;
+      font-size: 14px;
       z-index: 5;
-      background: rgba(0,0,0,0.5);
-      padding: 6px 16px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 20px;
       border-radius: 20px;
-      letter-spacing: 1px;
+      border: 1px solid #333;
+      pointer-events: none;
+      animation: pulse 2s ease-in-out infinite;
     }
-    .flicker {
-      animation: flicker 0.15s infinite alternate;
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
     }
-    @keyframes flicker {
-      0% { opacity: 0.9; }
-      100% { opacity: 1; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #ui { font-size: 12px; padding: 6px 12px; top: 6px; }
+      #keys-display { font-size: 14px; padding: 8px 14px; bottom: 12px; gap: 8px; }
+      #keys-display .key-icon { font-size: 18px; }
+      #crosshair { font-size: 22px; }
+      #joystick-area { width: 100px; height: 100px; left: 20px; bottom: 80px; }
+      #joystick-knob { width: 40px; height: 40px; }
+      #action-btn { width: 54px; height: 54px; font-size: 22px; right: 20px; bottom: 85px; }
+      #controls-hint { display: none; }
+      #click-hint { display: none; }
+    }
+
+    @media (pointer: coarse) {
+      #touch-zone { display: block; }
+      #joystick-area { display: block; }
+      #look-area { display: block; }
+      #action-btn { display: flex; }
+      #controls-hint.mobile { display: block; }
+      #click-hint { display: none; }
+    }
+
+    @media (pointer: fine) {
+      #touch-zone { display: none; }
+      #joystick-area { display: none; }
+      #look-area { display: none; }
+      #action-btn { display: none; }
+      #controls-hint.mobile { display: none; }
     }
   </style>
 </head>
 <body>
 
-<div id="ui">👻 Find <span>3 keys</span> to escape the maze</div>
+<div id="ui">👻 Find <span>3 keys</span> to escape</div>
 
 <div id="keys-display">
   <span class="key-icon">🔑</span>
   <span>Keys: <span class="count" id="keyCount">0</span> / 3</span>
-  <span style="color:#666;margin-left:10px;">|</span>
-  <span id="door-status" style="color:#ff4444;">🚪 Locked</span>
+  <span style="color:#666;margin:0 4px;">|</span>
+  <span id="door-status" class="locked">🚪 Locked</span>
 </div>
 
 <div id="crosshair">+</div>
-<div id="controls-hint">WASD · Mouse to look · Click to lock mouse</div>
+
+<div id="controls-hint">WASD · Mouse to look · Click to lock</div>
+<div id="controls-hint" class="mobile">🕹️ Left stick: Move · Right drag: Look</div>
+
+<div id="click-hint">🖱️ Click to lock mouse</div>
+
+<!-- Mobile controls -->
+<div id="touch-zone"></div>
+<div id="joystick-area">
+  <div id="joystick-knob"></div>
+</div>
+<div id="look-area"></div>
+<div id="action-btn">🔦</div>
 
 <div id="win-screen">
   <h1>🎉 ESCAPED!</h1>
@@ -144,8 +317,8 @@
 </div>
 
 <div id="lose-screen">
-  <h1>💀 GAME OVER</h1>
-  <p>You were caught...</p>
+  <h1>💀 CAUGHT</h1>
+  <p>The darkness got you...</p>
   <button onclick="location.reload()">🔄 Try Again</button>
 </div>
 
@@ -153,8 +326,7 @@
 </script>
 <script>
   // ============================================================
-  //  THE DARK MAZE — 3D First-Person Horror with Keys
-  //  Uses Three.js with PointerLock, fog, flickering lights
+  //  THE DARK MAZE — Mobile + Desktop 3D Horror
   // ============================================================
 
   // ---------- SETUP ----------
@@ -179,18 +351,15 @@
   const ambient = new THREE.AmbientLight(0x222244, 0.3);
   scene.add(ambient);
 
-  // Flickering main light
   const mainLight = new THREE.PointLight(0xff8844, 0.8, 15);
   mainLight.position.set(0, 5, 0);
   mainLight.castShadow = true;
   scene.add(mainLight);
 
-  // Additional dim lights
   const fillLight = new THREE.PointLight(0x4466ff, 0.2, 10);
   fillLight.position.set(-3, 2, -3);
   scene.add(fillLight);
 
-  // Small red emergency light
   const redLight = new THREE.PointLight(0xff2222, 0.15, 8);
   redLight.position.set(5, 1, 5);
   scene.add(redLight);
@@ -207,14 +376,11 @@
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // Grid texture for floor (just a subtle effect)
   const gridHelper = new THREE.GridHelper(40, 40, 0x333355, 0x222244);
   gridHelper.position.y = 0.01;
   scene.add(gridHelper);
 
-  // ---------- MAZE WALLS ----------
-  // Simple maze layout: 10x10 grid with walls
-  // 1 = wall, 0 = path, 2 = key position, 3 = exit
+  // ---------- MAZE ----------
   const mazeLayout = [
     [1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,1,0,0,0,0,1],
@@ -229,9 +395,8 @@
   ];
 
   const wallHeight = 2.8;
-  const wallThickness = 0.2;
   const cellSize = 1;
-  const offset = -4.5; // center the maze
+  const offset = -4.5;
 
   const wallMat = new THREE.MeshStandardMaterial({
     color: 0x2a2a4a,
@@ -254,8 +419,6 @@
       if (mazeLayout[row][col] === 1) {
         const x = col + offset;
         const z = row + offset;
-
-        // Main wall block
         const block = new THREE.Mesh(
           new THREE.BoxGeometry(cellSize, wallHeight, cellSize),
           wallMat
@@ -265,7 +428,6 @@
         block.receiveShadow = true;
         wallGroup.add(block);
 
-        // Slightly darker top
         const top = new THREE.Mesh(
           new THREE.BoxGeometry(cellSize * 0.9, 0.05, cellSize * 0.9),
           wallMatTop
@@ -295,8 +457,6 @@
 
   keyPositions.forEach((pos, i) => {
     const keyGroup = new THREE.Group();
-
-    // Key shaft
     const shaft = new THREE.Mesh(
       new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8),
       keyMat
@@ -305,7 +465,6 @@
     shaft.position.y = 0.25;
     keyGroup.add(shaft);
 
-    // Key head (circle)
     const head = new THREE.Mesh(
       new THREE.TorusGeometry(0.12, 0.04, 8, 12),
       keyMat
@@ -314,7 +473,6 @@
     head.rotation.y = Math.PI / 2;
     keyGroup.add(head);
 
-    // Glow aura
     const glow = new THREE.Mesh(
       new THREE.SphereGeometry(0.15, 8, 8),
       new THREE.MeshBasicMaterial({
@@ -326,7 +484,6 @@
     glow.position.y = 0.25;
     keyGroup.add(glow);
 
-    // Point light on key
     const keyLight = new THREE.PointLight(0xffaa00, 0.3, 2);
     keyLight.position.y = 0.5;
     keyGroup.add(keyLight);
@@ -341,7 +498,6 @@
   const doorGroup = new THREE.Group();
   doorGroup.position.set(3.5, 0, -3.5);
 
-  // Door frame
   const frameMat = new THREE.MeshStandardMaterial({
     color: 0x333355,
     roughness: 0.5,
@@ -354,7 +510,6 @@
   frame.position.y = 1.3;
   doorGroup.add(frame);
 
-  // Door itself
   const doorMat = new THREE.MeshStandardMaterial({
     color: 0x4a2a2a,
     roughness: 0.7,
@@ -369,7 +524,6 @@
   door.position.set(0, 1.1, 0.05);
   doorGroup.add(door);
 
-  // Door handle
   const handleMat = new THREE.MeshStandardMaterial({
     color: 0xffaa00,
     metalness: 0.8,
@@ -382,12 +536,10 @@
   handle.position.set(0.35, 1.1, 0.1);
   doorGroup.add(handle);
 
-  // "EXIT" sign glow
   const exitLight = new THREE.PointLight(0xff4444, 0.5, 3);
   exitLight.position.set(0, 2.2, 0);
   doorGroup.add(exitLight);
 
-  // Sign text (using a small box with emissive)
   const signMat = new THREE.MeshStandardMaterial({
     color: 0xff2222,
     emissive: 0xff0000,
@@ -402,15 +554,12 @@
 
   scene.add(doorGroup);
 
-  // Door state
   let keysCollected = 0;
   let doorUnlocked = false;
   let gameOver = false;
 
-  // ---------- ENEMY / SPOOKY PRESENCE ----------
-  // A floating red glowing orb that patrols
+  // ---------- ENEMY ----------
   const enemyGroup = new THREE.Group();
-
   const enemyMat = new THREE.MeshStandardMaterial({
     color: 0xff2222,
     emissive: 0xff0000,
@@ -424,7 +573,6 @@
   );
   enemyGroup.add(enemyBody);
 
-  // Glow aura
   const enemyGlow = new THREE.Mesh(
     new THREE.SphereGeometry(0.5, 8, 8),
     new THREE.MeshBasicMaterial({
@@ -442,57 +590,15 @@
   enemyGroup.position.set(2, 0.5, 2);
   scene.add(enemyGroup);
 
-  let enemyTarget = new THREE.Vector3(0, 0.5, 0);
   let enemyTimer = 0;
 
-  // ---------- PLAYER CONTROLS ----------
-  const velocity = new THREE.Vector3();
-  const direction = new THREE.Vector3();
-  const playerHeight = 1.7;
-  let isLocked = false;
-  let pitch = 0;
+  // ---------- PLAYER STATE ----------
   let yaw = 0;
+  let pitch = 0;
+  let isLocked = false;
+  const playerHeight = 1.7;
 
-  const keysPressed = {
-    w: false, a: false, s: false, d: false
-  };
-
-  // Pointer lock
-  document.addEventListener('click', () => {
-    if (!isLocked && !gameOver) {
-      renderer.domElement.requestPointerLock();
-    }
-  });
-
-  document.addEventListener('pointerlockchange', () => {
-    isLocked = document.pointerLockElement === renderer.domElement;
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isLocked) return;
-    yaw -= e.movementX * 0.002;
-    pitch -= e.movementY * 0.002;
-    pitch = Math.max(-0.8, Math.min(0.8, pitch));
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key in keysPressed) {
-      keysPressed[e.key] = true;
-      e.preventDefault();
-    }
-    if (e.key === 'r' && gameOver) {
-      location.reload();
-    }
-  });
-
-  document.addEventListener('keyup', (e) => {
-    if (e.key in keysPressed) {
-      keysPressed[e.key] = false;
-      e.preventDefault();
-    }
-  });
-
-  // ---------- COLLISION DETECTION ----------
+  // ---------- COLLISION ----------
   function isWallAt(x, z) {
     const margin = 0.25;
     const col = Math.round(x - offset);
@@ -508,7 +614,6 @@
 
   function canMoveTo(x, z) {
     const radius = 0.3;
-    // Check multiple points around the player
     const points = [
       [x, z],
       [x - radius, z],
@@ -526,7 +631,7 @@
     return true;
   }
 
-  // ---------- KEY COLLECTION ----------
+  // ---------- GAME FUNCTIONS ----------
   function checkKeyCollection() {
     const pos = camera.position;
     for (let key of keys) {
@@ -542,10 +647,9 @@
         showToast('🔑 Key found! ' + (3 - keysCollected) + ' remaining');
         if (keysCollected === 3) {
           doorUnlocked = true;
-          document.getElementById('door-status').style.color = '#66ff66';
+          document.getElementById('door-status').className = 'unlocked';
           document.getElementById('door-status').textContent = '🚪 Unlocked!';
           showToast('🚪 All keys found! Escape through the exit!');
-          // Change door color
           door.material.color.setHex(0x2a6a2a);
           door.material.emissive.setHex(0x00ff00);
           door.material.emissiveIntensity = 0.2;
@@ -557,22 +661,20 @@
   function updateDoorStatus() {
     const el = document.getElementById('door-status');
     if (keysCollected === 3) {
-      el.style.color = '#66ff66';
+      el.className = 'unlocked';
       el.textContent = '🚪 Unlocked!';
     } else {
-      el.style.color = '#ff4444';
+      el.className = 'locked';
       el.textContent = '🚪 Locked (' + (3 - keysCollected) + ' keys)';
     }
   }
 
-  // ---------- EXIT CHECK ----------
   function checkExit() {
     if (!doorUnlocked) return;
     const pos = camera.position;
     const dx = pos.x - 3.5;
     const dz = pos.z - (-3.5);
     if (Math.sqrt(dx*dx + dz*dz) < 0.8) {
-      // WIN!
       gameOver = true;
       document.getElementById('win-screen').style.display = 'flex';
       if (document.pointerLockElement) {
@@ -581,165 +683,218 @@
     }
   }
 
-  // ---------- ENEMY AI ----------
   function updateEnemy(delta) {
     enemyTimer += delta;
-
-    // Patrol between a few points
     const points = [
-      [2, 2],
-      [-2, 3],
-      [-3, -2],
-      [1, -3],
-      [3, -1]
+      [2, 2], [-2, 3], [-3, -2], [1, -3], [3, -1]
     ];
-
     const idx = Math.floor(enemyTimer / 3) % points.length;
     const nextIdx = (idx + 1) % points.length;
     const t = (enemyTimer % 3) / 3;
-
     const start = points[idx];
     const end = points[nextIdx];
-
     const x = start[0] + (end[0] - start[0]) * t;
     const z = start[1] + (end[1] - start[1]) * t;
-
     enemyGroup.position.x = x;
     enemyGroup.position.z = z;
-
-    // Bob
     enemyGroup.position.y = 0.5 + Math.sin(enemyTimer * 2) * 0.1;
-
-    // Face player slightly
     const dx = camera.position.x - x;
     const dz = camera.position.z - z;
     enemyGroup.rotation.y = Math.atan2(dx, dz);
-
-    // Check if enemy is near player
     const dist = Math.sqrt(dx*dx + dz*dz);
     if (dist < 0.8 && keysCollected < 3) {
-      // GAME OVER — caught!
       gameOver = true;
       document.getElementById('lose-screen').style.display = 'flex';
       if (document.pointerLockElement) {
         document.exitPointerLock();
       }
     }
-
-    // Pulse enemy glow
     enemyGlow.material.opacity = 0.1 + Math.sin(enemyTimer * 4) * 0.05;
     enemyBody.material.emissiveIntensity = 0.3 + Math.sin(enemyTimer * 3) * 0.2;
+  }
+
+  function updateFlicker(delta) {
+    mainLight.intensity = 0.6 + Math.random() * 0.3;
+    mainLight.color.setHSL(0.08, 0.8, 0.4 + Math.random() * 0.2);
   }
 
   // ---------- TOAST ----------
   function showToast(msg) {
     const el = document.createElement('div');
-    el.style.cssText = `
-      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px;
-      border-radius: 12px; font-size: 18px; z-index: 50;
-      border-left: 4px solid #ffcc00;
-      backdrop-filter: blur(4px);
-      animation: fadeUp 0.3s ease;
-      font-weight: bold;
-    `;
+    el.className = 'toast';
     el.textContent = msg;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 2500);
   }
 
-  // ---------- LIGHT FLICKER ----------
-  let flickerTimer = 0;
-
-  function updateFlicker(delta) {
-    flickerTimer += delta;
-    if (flickerTimer > 0.05) {
-      flickerTimer = 0;
-      const intensity = 0.6 + Math.random() * 0.3;
-      mainLight.intensity = intensity;
-      mainLight.color.setHSL(0.08, 0.8, 0.4 + Math.random() * 0.2);
+  // ============================================================
+  //  DESKTOP CONTROLS (PointerLock)
+  // ============================================================
+  document.addEventListener('click', () => {
+    if (!isLocked && !gameOver && !('ontouchstart' in window)) {
+      renderer.domElement.requestPointerLock();
     }
+  });
+
+  document.addEventListener('pointerlockchange', () => {
+    isLocked = document.pointerLockElement === renderer.domElement;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isLocked) return;
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+    pitch = Math.max(-0.8, Math.min(0.8, pitch));
+  });
+
+  const keysPressed = { w: false, a: false, s: false, d: false };
+  document.addEventListener('keydown', (e) => {
+    if (e.key in keysPressed) {
+      keysPressed[e.key] = true;
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.key in keysPressed) {
+      keysPressed[e.key] = false;
+      e.preventDefault();
+    }
+  });
+
+  // ============================================================
+  //  MOBILE CONTROLS (Touch)
+  // ============================================================
+  let joystickActive = false;
+  let joystickX = 0, joystickY = 0;
+  const joystickArea = document.getElementById('joystick-area');
+  const joystickKnob = document.getElementById('joystick-knob');
+  const lookArea = document.getElementById('look-area');
+  const actionBtn = document.getElementById('action-btn');
+
+  // Joystick
+  joystickArea.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    joystickActive = true;
+    updateJoystick(e);
+  }, { passive: false });
+
+  joystickArea.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (joystickActive) updateJoystick(e);
+  }, { passive: false });
+
+  joystickArea.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    joystickActive = false;
+    joystickX = 0;
+    joystickY = 0;
+    joystickKnob.style.transform = 'translate(-50%, -50%)';
+  }, { passive: false });
+
+  function updateJoystick(e) {
+    const touch = e.touches[0];
+    const rect = joystickArea.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    let dx = touch.clientX - cx;
+    let dy = touch.clientY - cy;
+    const maxDist = rect.width / 2 - 10;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist > maxDist) {
+      dx = dx / dist * maxDist;
+      dy = dy / dist * maxDist;
+    }
+    joystickX = dx / maxDist;
+    joystickY = dy / maxDist;
+    joystickKnob.style.transform = `translate(${-50 + (dx / maxDist) * 50}%, ${-50 + (dy / maxDist) * 50}%)`;
   }
 
-  // ---------- GAME LOOP ----------
+  // Look (drag on right side)
+  let lookActive = false;
+  let lastLookX = 0, lastLookY = 0;
+
+  lookArea.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    lookActive = true;
+    const touch = e.touches[0];
+    lastLookX = touch.clientX;
+    lastLookY = touch.clientY;
+  }, { passive: false });
+
+  lookArea.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (!lookActive) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - lastLookX;
+    const dy = touch.clientY - lastLookY;
+    yaw -= dx * 0.005;
+    pitch -= dy * 0.005;
+    pitch = Math.max(-0.8, Math.min(0.8, pitch));
+    lastLookX = touch.clientX;
+    lastLookY = touch.clientY;
+  }, { passive: false });
+
+  lookArea.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    lookActive = false;
+  }, { passive: false });
+
+  // Action button (flashlight toggle or just a fun button)
+  let flashlightOn = false;
+  actionBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    flashlightOn = !flashlightOn;
+    mainLight.intensity = flashlightOn ? 2.0 : 0.6;
+    mainLight.color.setHSL(0.08, 0.8, flashlightOn ? 0.8 : 0.4);
+    actionBtn.textContent = flashlightOn ? '💡' : '🔦';
+    showToast(flashlightOn ? '💡 Flashlight ON' : '🔦 Flashlight OFF');
+  }, { passive: false });
+
+  // Also support click on mobile
+  actionBtn.addEventListener('click', () => {
+    // handled by touchstart
+  });
+
+  // ============================================================
+  //  GAME LOOP
+  // ============================================================
   const clock = new THREE.Clock();
 
   function animate() {
     requestAnimationFrame(animate);
-
     const delta = Math.min(clock.getDelta(), 0.05);
 
-    if (!gameOver && isLocked) {
-      // Player movement
-      const speed = 3.0 * delta;
-      const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
-      const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-
+    if (!gameOver) {
+      // ---- MOVEMENT ----
       let moveX = 0, moveZ = 0;
-      if (keysPressed.w) { moveX += forward.x; moveZ += forward.z; }
-      if (keysPressed.s) { moveX -= forward.x; moveZ -= forward.z; }
-      if (keysPressed.a) { moveX -= right.x; moveZ -= right.z; }
-      if (keysPressed.d) { moveX += right.x; moveZ += right.z; }
 
-      if (moveX !== 0 || moveZ !== 0) {
-        const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
-        moveX /= len;
-        moveZ /= len;
-
-        const newX = camera.position.x + moveX * speed;
-        const newZ = camera.position.z + moveZ * speed;
-
-        // Check collision separately for X and Z (slide along walls)
-        if (canMoveTo(newX, camera.position.z)) {
-          camera.position.x = newX;
-        }
-        if (canMoveTo(camera.position.x, newZ)) {
-          camera.position.z = newZ;
-        }
+      if (isLocked) {
+        // Desktop
+        const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+        const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+        if (keysPressed.w) { moveX += forward.x; moveZ += forward.z; }
+        if (keysPressed.s) { moveX -= forward.x; moveZ -= forward.z; }
+        if (keysPressed.a) { moveX -= right.x; moveZ -= right.z; }
+        if (keysPressed.d) { moveX += right.x; moveZ += right.z; }
       }
 
-      // Update camera rotation
-      camera.rotation.order = 'YXZ';
-      camera.rotation.y = yaw;
-      camera.rotation.x = pitch;
+      // Mobile joystick
+      if (joystickActive || Math.abs(joystickX) > 0.05 || Math.abs(joystickY) > 0.05) {
+        const jx = joystickX;
+        const jy = joystickY;
+        // Transform joystick to world space
+        const angle = yaw;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        moveX += -jy * sin + jx * cos;
+        moveZ += -jy * cos - jx * sin;
+      }
 
-      // Check key collection
-      checkKeyCollection();
+      // Apply movement
+      if (moveX !== 0 || moveZ !== 0) {
+        const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
+        const speed = (isLocked ? 3.0 : 2.5) * delta;
+        moveX = (moveX / len) * speed;
+        moveZ = (moveZ / len) * speed;
 
-      // Check exit
-      checkExit();
-
-      // Update enemy
-      updateEnemy(delta);
-
-      // Update flicker
-      updateFlicker(delta);
-
-      // Update UI
-      document.getElementById('keyCount').textContent = keysCollected;
-    }
-
-    renderer.render(scene, camera);
-  }
-
-  // ---------- RESIZE ----------
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  // ---------- START ----------
-  animate();
-
-  // Initial door status
-  updateDoorStatus();
-
-  console.log('👻 The Dark Maze — Find 3 keys and escape!');
-  console.log('WASD to move · Mouse to look · Click to lock mouse');
-
-  // Prevent context menu
-  document.addEventListener('contextmenu', e => e.preventDefault());
-</script>
-</body>
-</html>
+        const new
