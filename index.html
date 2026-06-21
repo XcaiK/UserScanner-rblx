@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎮 Tic-Tac-Toe — Challenge a Friend</title>
+  <title>🎮 Tic-Tac-Toe — Play with Friends</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, sans-serif;
     }
     body {
       background: #0f0f1a;
@@ -20,35 +21,38 @@
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 520px;
       width: 100%;
       background: #1a1a2e;
-      padding: 30px;
+      padding: 28px;
       border-radius: 24px;
       border: 1px solid #2a2a4a;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     }
     h1 {
       text-align: center;
       color: #e94560;
-      margin-top: 0;
-      font-size: 28px;
+      margin: 0 0 4px 0;
+      font-size: 26px;
     }
     .sub {
       text-align: center;
       color: #888;
-      font-size: 14px;
-      margin-bottom: 20px;
+      font-size: 13px;
+      margin-bottom: 18px;
     }
     .status-bar {
       background: #0f0f1a;
-      padding: 14px 18px;
+      padding: 12px 16px;
       border-radius: 12px;
       text-align: center;
       font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 18px;
+      font-size: 16px;
+      margin-bottom: 16px;
       border-left: 4px solid #e94560;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .status-bar .highlight {
       color: #e94560;
@@ -58,8 +62,8 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       aspect-ratio: 1/1;
-      max-width: 400px;
-      margin: 0 auto 20px;
+      max-width: 380px;
+      margin: 0 auto 16px;
     }
     .cell {
       background: #0f0f1a;
@@ -97,22 +101,22 @@
     .controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       justify-content: center;
-      margin: 16px 0;
+      margin: 12px 0;
     }
     button {
       background: #e94560;
       color: #fff;
       border: none;
-      padding: 12px 24px;
+      padding: 12px 20px;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
       transition: 0.15s;
       flex: 1;
-      min-width: 120px;
+      min-width: 100px;
     }
     button:hover {
       background: #c73652;
@@ -130,13 +134,56 @@
     button.green:hover {
       background: #3a9a5a;
     }
+    .room-box {
+      background: #0f0f1a;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 10px 0;
+      border: 1px dashed #2a2a4a;
+    }
+    .room-box .code {
+      font-family: monospace;
+      font-size: 28px;
+      letter-spacing: 4px;
+      color: #e94560;
+      font-weight: bold;
+    }
+    .room-box .label {
+      color: #666;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .join-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .join-row input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #0f0f1a;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 4px;
+      font-family: monospace;
+    }
+    .join-row input::placeholder {
+      color: #444;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
     .players {
       display: flex;
       justify-content: space-between;
       background: #0f0f1a;
       border-radius: 12px;
-      padding: 12px 18px;
-      margin-bottom: 14px;
+      padding: 10px 16px;
+      margin-bottom: 12px;
       font-size: 14px;
       color: #aaa;
     }
@@ -149,63 +196,11 @@
     .players .waiting {
       color: #666;
     }
-    .game-code {
-      background: #0f0f1a;
-      padding: 10px;
-      border-radius: 8px;
+    .footer {
       text-align: center;
-      font-family: monospace;
-      font-size: 20px;
-      letter-spacing: 2px;
-      color: #e94560;
-      border: 1px dashed #2a2a4a;
-      margin: 10px 0;
-      word-break: break-all;
-    }
-    .game-code span {
-      color: #eee;
-    }
-    .online-list {
-      background: #0f0f1a;
-      border-radius: 12px;
-      padding: 14px;
+      color: #444;
+      font-size: 11px;
       margin-top: 16px;
-      max-height: 150px;
-      overflow-y: auto;
-    }
-    .online-list .title {
-      font-size: 12px;
-      text-transform: uppercase;
-      color: #666;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-    .online-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 8px;
-      border-radius: 6px;
-      background: #1a1a2e;
-      margin-bottom: 4px;
-    }
-    .online-item .name {
-      color: #ccc;
-    }
-    .online-item .status {
-      font-size: 12px;
-      color: #66ff66;
-    }
-    .online-item .status.idle {
-      color: #888;
-    }
-    .online-item button {
-      padding: 2px 12px;
-      font-size: 12px;
-      min-width: auto;
-      flex: 0;
-    }
-    .hidden {
-      display: none !important;
     }
     .toast {
       position: fixed;
@@ -214,51 +209,49 @@
       transform: translateX(-50%);
       background: #2a2a4a;
       color: #fff;
-      padding: 14px 28px;
+      padding: 12px 24px;
       border-radius: 12px;
       font-weight: bold;
       border-left: 4px solid #e94560;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
       z-index: 999;
       animation: fadeUp 0.3s ease;
     }
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
-    .footer {
-      text-align: center;
-      color: #444;
+    .connection-status {
       font-size: 12px;
-      margin-top: 20px;
+      color: #666;
+      text-align: center;
+      margin: 4px 0 10px 0;
     }
-    ::-webkit-scrollbar {
-      width: 4px;
+    .connection-status.connected {
+      color: #66ff66;
     }
-    ::-webkit-scrollbar-track {
-      background: #0f0f1a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #2a2a4a;
-      border-radius: 8px;
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
 
-<div class="container" id="app">
+<div class="container">
   <h1>🎮 Tic-Tac-Toe</h1>
-  <div class="sub">Challenge someone on this site</div>
+  <div class="sub">Play with anyone, anywhere</div>
 
-  <!-- Game Code Display -->
-  <div class="game-code" id="gameCodeDisplay">
-    📋 Game: <span id="gameCode">—</span>
+  <!-- Room -->
+  <div class="room-box" id="roomBox">
+    <div class="label">🏠 Your Room Code</div>
+    <div class="code" id="roomCode">—</div>
+    <div style="margin-top:6px; font-size:13px; color:#666;" id="connectionStatus">🔴 Not connected</div>
+    <button onclick="copyRoomCode()" class="secondary" style="margin-top:8px; padding:6px 12px; font-size:12px; flex:0;">📋 Copy Code</button>
+  </div>
+
+  <!-- Join section -->
+  <div style="display:flex; gap:8px; margin:10px 0;">
+    <input id="joinInput" placeholder="Enter room code to join" style="flex:1; padding:12px; border-radius:10px; border:none; background:#0f0f1a; color:#fff; font-family:monospace; font-size:18px; text-align:center; letter-spacing:2px;">
+    <button onclick="joinRoom()" style="flex:0; padding:12px 24px;">Join</button>
   </div>
 
   <!-- Players -->
@@ -268,7 +261,7 @@
   </div>
 
   <!-- Status -->
-  <div class="status-bar" id="status">🎯 Click <span class="highlight">New Game</span> to start</div>
+  <div class="status-bar" id="status">🎯 Create or join a room to start</div>
 
   <!-- Board -->
   <div class="board" id="board">
@@ -285,266 +278,334 @@
 
   <!-- Controls -->
   <div class="controls">
-    <button onclick="createGame()">🆕 New Game</button>
-    <button onclick="joinGame()" class="secondary">🔗 Join with Code</button>
+    <button onclick="createRoom()">🆕 Create Room</button>
     <button onclick="resetGame()" class="secondary">🔄 Reset</button>
+    <button onclick="leaveGame()" class="secondary" style="background:#4a1a1a;">🚪 Leave</button>
   </div>
 
-  <!-- Online Players -->
-  <div class="online-list" id="onlineList">
-    <div class="title">👥 Online & Available</div>
-    <div id="onlinePlayers">
-      <div style="color:#666; text-align:center; padding:8px;">No one else is online yet.<br>Open this page in another tab to test!</div>
-    </div>
-  </div>
-
-  <div class="footer">💡 Open in multiple tabs to test multiplayer · All data stays in your browser</div>
+  <div class="footer">💡 Send the room code to a friend. They paste it and click Join.</div>
 </div>
 
 <script>
-  // ============================================
-  //  TIC-TAC-TOE + MULTIPLAYER (same browser)
-  //  Uses BroadcastChannel API for tab-to-tab
-  //  + localStorage for persistence
-  // ============================================
+  // ============================================================
+  //  TIC-TAC-TOE with PEERJS — real multiplayer across devices
+  // ============================================================
 
-  const BOARD_SIZE = 9;
+  let peer = null;
+  let conn = null;
+  let roomId = null;
+  let isHost = false;
+
   let board = Array(9).fill(null);
-  let currentPlayer = 'X'; // 'X' always starts
-  let gameActive = false;
-  let gameId = null;
-  let playerSymbol = 'X'; // what this tab is
+  let currentPlayer = 'X';
+  let playerSymbol = 'X';
   let opponentSymbol = 'O';
+  let gameActive = false;
   let gameOver = false;
   let myTurn = false;
 
-  // Channel for cross-tab communication
-  let channel = null;
-  let channelReady = false;
-
-  // DOM refs
   const cells = document.querySelectorAll('.cell');
   const statusEl = document.getElementById('status');
-  const gameCodeEl = document.getElementById('gameCode');
+  const roomCodeEl = document.getElementById('roomCode');
+  const connectionStatusEl = document.getElementById('connectionStatus');
   const playerXEl = document.getElementById('playerX');
   const playerOEl = document.getElementById('playerO');
-  const onlinePlayersEl = document.getElementById('onlinePlayers');
+  const joinInput = document.getElementById('joinInput');
 
-  // ========== INIT ==========
-  function init() {
-    // Try to restore game from localStorage
-    const saved = localStorage.getItem('ttt_game');
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        if (data.board && data.gameId) {
-          board = data.board;
-          gameId = data.gameId;
-          currentPlayer = data.currentPlayer || 'X';
-          gameActive = data.gameActive || false;
-          gameOver = data.gameOver || false;
-          playerSymbol = data.playerSymbol || 'X';
-          opponentSymbol = playerSymbol === 'X' ? 'O' : 'X';
-          renderBoard();
-          updateStatus();
-          updatePlayers();
-          if (gameId) gameCodeEl.textContent = gameId;
-        }
-      } catch (e) {}
-    }
+  let peerId = null;
 
-    // Setup BroadcastChannel
-    try {
-      channel = new BroadcastChannel('ttt_channel');
-      channel.onmessage = handleChannelMessage;
-      channelReady = true;
-      // Announce presence
-      announcePresence();
-    } catch (e) {
-      console.log('BroadcastChannel not supported — multiplayer limited');
-    }
-
-    // Update online list periodically
-    updateOnlineList();
-    setInterval(updateOnlineList, 5000);
-
-    // Click listeners
-    cells.forEach((cell, idx) => {
-      cell.addEventListener('click', () => handleCellClick(idx));
+  // ========== PEERJS INIT ==========
+  function initPeer() {
+    peer = new Peer({
+      debug: 2,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
     });
 
-    // Auto-join if we have a gameId
-    if (gameId && !gameActive) {
-      // We're in a game but not active — try to join
-      joinGameById(gameId);
-    }
+    peer.on('open', (id) => {
+      peerId = id;
+      console.log('Peer ID:', id);
+      // Auto-create a room if none exists
+      if (!roomId) {
+        // Just show the ID — user clicks Create Room
+      }
+      updateConnectionStatus('🟢 Ready');
+    });
+
+    peer.on('connection', (incoming) => {
+      // Someone is connecting to us
+      if (conn) {
+        incoming.close();
+        showToast('❌ Already in a game');
+        return;
+      }
+      conn = incoming;
+      setupConnection();
+      isHost = true;
+      playerSymbol = 'X';
+      opponentSymbol = 'O';
+      gameActive = true;
+      gameOver = false;
+      myTurn = true;
+      currentPlayer = 'X';
+      board = Array(9).fill(null);
+      renderBoard();
+      updatePlayers();
+      updateStatus();
+      showToast('🎉 Opponent joined! You are X');
+      updateConnectionStatus('🟢 Connected');
+      sendState();
+    });
+
+    peer.on('error', (err) => {
+      console.log('Peer error:', err);
+      if (err.type === 'peer-unavailable') {
+        showToast('❌ Room not found. Check the code.');
+      }
+    });
+
+    // Auto-generate a peer ID for room code
+    // We'll use the peer ID as the room code
   }
 
-  // ========== CHANNEL MESSAGES ==========
-  function handleChannelMessage(e) {
-    const msg = e.data;
-    if (!msg || !msg.type) return;
+  function setupConnection() {
+    conn.on('open', () => {
+      console.log('Connection open');
+      updateConnectionStatus('🟢 Connected');
+      if (!isHost) {
+        // We joined — request state
+        sendMessage({ type: 'sync_request' });
+      }
+    });
 
-    switch (msg.type) {
-      case 'presence':
-        // Someone is online
-        updateOnlineList();
-        break;
+    conn.on('data', (data) => {
+      handleMessage(data);
+    });
 
-      case 'move':
-        // Opponent made a move
-        if (msg.gameId === gameId && msg.symbol !== playerSymbol) {
-          if (!gameOver && gameActive) {
-            board[msg.index] = msg.symbol;
-            currentPlayer = msg.symbol === 'X' ? 'O' : 'X';
-            renderBoard();
-            checkGameState();
-            saveGame();
-            updateStatus();
-            announcePresence();
-          }
-        }
-        break;
-
-      case 'game_created':
-        // Someone created a new game — refresh list
-        updateOnlineList();
-        break;
-
-      case 'game_joined':
-        // Someone joined our game
-        if (msg.gameId === gameId && msg.joinerSymbol === opponentSymbol) {
-          gameActive = true;
-          gameOver = false;
-          myTurn = (playerSymbol === 'X'); // X always starts
-          saveGame();
-          updateStatus();
-          updatePlayers();
-          showToast('🎉 Opponent joined! Game on!');
-        }
-        break;
-
-      case 'game_reset':
-        if (msg.gameId === gameId) {
-          resetBoard(true);
-          showToast('🔄 Game was reset by opponent');
-        }
-        break;
-
-      case 'game_abandoned':
-        if (msg.gameId === gameId) {
-          gameActive = false;
-          gameOver = true;
-          statusEl.innerHTML = '😢 Opponent left the game. Start a new one.';
-          saveGame();
-        }
-        break;
-
-      case 'ping':
-        // Respond to ping
-        if (channelReady) {
-          channel.postMessage({ type: 'pong', from: 'tab_' + Date.now() });
-        }
-        break;
-    }
-  }
-
-  function announcePresence() {
-    if (!channelReady) return;
-    channel.postMessage({
-      type: 'presence',
-      gameId: gameId || null,
-      timestamp: Date.now()
+    conn.on('close', () => {
+      showToast('🔌 Opponent disconnected');
+      updateConnectionStatus('🔴 Disconnected');
+      gameActive = false;
+      conn = null;
+      statusEl.innerHTML = '💔 Opponent left. Create a new room.';
     });
   }
 
   // ========== CREATE / JOIN ==========
-  function createGame() {
-    // Generate a short game code
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars[Math.floor(Math.random() * chars.length)];
+  function createRoom() {
+    if (!peer) {
+      showToast('⏳ Connecting... wait a second');
+      return;
     }
-    gameId = code;
-    gameCodeEl.textContent = gameId;
-
-    // Reset board
-    resetBoard(true);
-    gameActive = false;
-    gameOver = false;
+    if (conn) {
+      showToast('Already in a game. Leave first.');
+      return;
+    }
+    roomId = peerId;
+    roomCodeEl.textContent = roomId;
+    isHost = true;
     playerSymbol = 'X';
     opponentSymbol = 'O';
-    currentPlayer = 'X';
-    myTurn = true;
-
-    // Save
-    saveGame();
-    updatePlayers();
-    updateStatus();
-    renderBoard();
-
-    showToast('🆕 Game created! Share the code: ' + gameId);
-    announcePresence();
-
-    // Broadcast that a game was created
-    if (channelReady) {
-      channel.postMessage({ type: 'game_created', gameId: gameId });
-    }
-
-    // Auto-join check — maybe someone is waiting
-    setTimeout(() => {
-      // See if any other tab has this game ID already
-      updateOnlineList();
-    }, 500);
-  }
-
-  function joinGame() {
-    const code = prompt('Enter the game code:', gameId || '');
-    if (!code || code.trim().length < 4) return;
-    joinGameById(code.trim().toUpperCase());
-  }
-
-  function joinGameById(code) {
-    // Check if we can join — we'll just set our state
-    // In a real implementation, we'd check if the game exists.
-    // Here we assume it does.
-    gameId = code;
-    gameCodeEl.textContent = gameId;
-
-    // We join as 'O'
-    playerSymbol = 'O';
-    opponentSymbol = 'X';
-    gameActive = true;
+    gameActive = false;
     gameOver = false;
-    myTurn = false; // X goes first
-    currentPlayer = 'X';
-
-    // Reset board
+    myTurn = false;
     board = Array(9).fill(null);
     renderBoard();
-
-    saveGame();
     updatePlayers();
-    updateStatus();
+    statusEl.innerHTML = '⏳ Waiting for opponent to join...';
+    updateConnectionStatus('🟡 Waiting for player...');
+    showToast('🆕 Room created! Share the code.');
+  }
 
-    showToast('🔗 Joined game ' + gameId + ' as O');
-
-    // Broadcast join
-    if (channelReady) {
-      channel.postMessage({
-        type: 'game_joined',
-        gameId: gameId,
-        joinerSymbol: 'O'
-      });
+  function joinRoom() {
+    const code = joinInput.value.trim();
+    if (!code) {
+      showToast('Please enter a room code');
+      return;
     }
-    announcePresence();
+    if (!peer) {
+      showToast('⏳ Still connecting... try again in 2s');
+      return;
+    }
+    if (conn) {
+      showToast('Already in a game. Leave first.');
+      return;
+    }
+
+    roomId = code;
+    roomCodeEl.textContent = roomId;
+    isHost = false;
+    playerSymbol = 'O';
+    opponentSymbol = 'X';
+    gameActive = false;
+    gameOver = false;
+    myTurn = false;
+
+    // Connect to the host
+    conn = peer.connect(code, { reliable: true });
+    setupConnection();
+
+    updateConnectionStatus('🟡 Connecting...');
+    statusEl.innerHTML = '⏳ Connecting to ' + code + '...';
+  }
+
+  function joinRoomWithCode(code) {
+    joinInput.value = code;
+    joinRoom();
+  }
+
+  function copyRoomCode() {
+    if (!roomId) {
+      showToast('Create a room first');
+      return;
+    }
+    navigator.clipboard.writeText(roomId).then(() => {
+      showToast('✅ Room code copied!');
+    }).catch(() => {
+      // Fallback
+      const input = document.createElement('input');
+      input.value = roomId;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      input.remove();
+      showToast('✅ Copied!');
+    });
+  }
+
+  function leaveGame() {
+    if (conn) {
+      conn.close();
+      conn = null;
+    }
+    roomId = null;
+    roomCodeEl.textContent = '—';
+    gameActive = false;
+    gameOver = false;
+    board = Array(9).fill(null);
+    renderBoard();
+    updatePlayers();
+    statusEl.innerHTML = '🎯 Create or join a room to start';
+    updateConnectionStatus('🔴 Not connected');
+    showToast('🚪 Left the game');
+  }
+
+  // ========== MESSAGING ==========
+  function sendMessage(msg) {
+    if (conn && conn.open) {
+      conn.send(msg);
+    }
+  }
+
+  function sendState() {
+    sendMessage({
+      type: 'state',
+      board: board,
+      currentPlayer: currentPlayer,
+      gameActive: gameActive,
+      gameOver: gameOver,
+      playerSymbol: playerSymbol // our symbol
+    });
+  }
+
+  function handleMessage(data) {
+    switch (data.type) {
+      case 'sync_request':
+        // Send our state to the joiner
+        sendState();
+        break;
+
+      case 'state':
+        // Receive full state
+        board = data.board;
+        currentPlayer = data.currentPlayer;
+        gameActive = data.gameActive;
+        gameOver = data.gameOver;
+        // Determine our turn
+        myTurn = (currentPlayer === playerSymbol);
+        renderBoard();
+        updateStatus();
+        updatePlayers();
+        // Check win state
+        const win = checkWin(board);
+        if (win && gameOver) {
+          highlightWin(win);
+          const winner = board[win[0]];
+          if (winner === playerSymbol) {
+            statusEl.innerHTML = '🏆 You win! 🎉';
+          } else if (winner) {
+            statusEl.innerHTML = '😅 Opponent wins!';
+          } else {
+            statusEl.innerHTML = '🤝 It\'s a tie!';
+          }
+        } else if (gameOver) {
+          statusEl.innerHTML = '🤝 Game over';
+        } else if (gameActive) {
+          updateStatus();
+        }
+        showToast('📥 Game state synced');
+        break;
+
+      case 'move':
+        if (!gameActive || gameOver) break;
+        const idx = data.index;
+        const symbol = data.symbol;
+        if (symbol === playerSymbol) break; // ignore our own moves (echo)
+        if (board[idx] !== null) break;
+        board[idx] = symbol;
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        myTurn = (currentPlayer === playerSymbol);
+        renderBoard();
+        const winResult = checkWin(board);
+        if (winResult) {
+          gameOver = true;
+          gameActive = false;
+          highlightWin(winResult);
+          const winner = board[winResult[0]];
+          if (winner === playerSymbol) {
+            statusEl.innerHTML = '🏆 You win! 🎉';
+          } else if (winner) {
+            statusEl.innerHTML = '😅 Opponent wins!';
+          }
+        } else if (board.every(c => c !== null)) {
+          gameOver = true;
+          gameActive = false;
+          statusEl.innerHTML = '🤝 It\'s a tie!';
+        } else {
+          updateStatus();
+        }
+        break;
+
+      case 'reset':
+        board = Array(9).fill(null);
+        gameOver = false;
+        gameActive = true;
+        currentPlayer = 'X';
+        myTurn = (playerSymbol === 'X');
+        renderBoard();
+        cells.forEach(c => c.classList.remove('win'));
+        updateStatus();
+        showToast('🔄 Game reset');
+        break;
+
+      case 'leave':
+        showToast('🔌 Opponent left the game');
+        conn = null;
+        gameActive = false;
+        statusEl.innerHTML = '💔 Opponent left. Create a new room.';
+        updateConnectionStatus('🔴 Disconnected');
+        break;
+    }
   }
 
   // ========== GAME LOGIC ==========
   function handleCellClick(index) {
     if (!gameActive || gameOver) {
-      showToast('⏳ Game not active. Start or join a game first.');
+      showToast('⏳ Game not active');
       return;
     }
     if (!myTurn) {
@@ -552,7 +613,7 @@
       return;
     }
     if (board[index] !== null) {
-      showToast('❌ That cell is taken!');
+      showToast('❌ Cell taken');
       return;
     }
 
@@ -567,8 +628,7 @@
       gameActive = false;
       highlightWin(win);
       statusEl.innerHTML = '🏆 You win! 🎉';
-      saveGame();
-      announcePresence();
+      sendMessage({ type: 'move', index: index, symbol: playerSymbol });
       return;
     }
 
@@ -577,8 +637,7 @@
       gameOver = true;
       gameActive = false;
       statusEl.innerHTML = '🤝 It\'s a tie!';
-      saveGame();
-      announcePresence();
+      sendMessage({ type: 'move', index: index, symbol: playerSymbol });
       return;
     }
 
@@ -586,23 +645,9 @@
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     myTurn = (currentPlayer === playerSymbol);
     updateStatus();
-    saveGame();
-    announcePresence();
 
-    // Broadcast move
-    if (channelReady) {
-      channel.postMessage({
-        type: 'move',
-        gameId: gameId,
-        index: index,
-        symbol: playerSymbol
-      });
-    }
-
-    // Check if opponent is still there (pong test)
-    if (channelReady) {
-      channel.postMessage({ type: 'ping' });
-    }
+    // Send move
+    sendMessage({ type: 'move', index: index, symbol: playerSymbol });
   }
 
   function checkWin(board) {
@@ -622,60 +667,23 @@
 
   function highlightWin(line) {
     if (!line) return;
-    line.forEach(idx => {
-      cells[idx].classList.add('win');
-    });
-    // Mark win on board for render
-  }
-
-  function checkGameState() {
-    const win = checkWin(board);
-    if (win) {
-      gameOver = true;
-      gameActive = false;
-      highlightWin(win);
-      const winner = board[win[0]];
-      if (winner === playerSymbol) {
-        statusEl.innerHTML = '🏆 You win! 🎉';
-      } else if (winner) {
-        statusEl.innerHTML = '😅 Opponent wins!';
-      }
-      saveGame();
-      return true;
-    }
-    if (board.every(c => c !== null)) {
-      gameOver = true;
-      gameActive = false;
-      statusEl.innerHTML = '🤝 It\'s a tie!';
-      saveGame();
-      return true;
-    }
-    return false;
-  }
-
-  function resetBoard(silent = false) {
-    board = Array(9).fill(null);
-    gameOver = false;
-    currentPlayer = 'X';
-    myTurn = (playerSymbol === 'X');
-    cells.forEach(c => c.classList.remove('win', 'x', 'o', 'taken'));
-    renderBoard();
-    updateStatus();
-    if (!silent) {
-      saveGame();
-      if (channelReady) {
-        channel.postMessage({ type: 'game_reset', gameId: gameId });
-      }
-    }
+    line.forEach(idx => cells[idx].classList.add('win'));
   }
 
   function resetGame() {
-    if (!gameId) {
-      createGame();
+    if (!conn || !conn.open) {
+      showToast('Not connected to anyone');
       return;
     }
-    resetBoard(false);
-    showToast('🔄 Game reset');
+    board = Array(9).fill(null);
+    gameOver = false;
+    gameActive = true;
+    currentPlayer = 'X';
+    myTurn = (playerSymbol === 'X');
+    cells.forEach(c => c.classList.remove('win'));
+    renderBoard();
+    updateStatus();
+    sendMessage({ type: 'reset' });
   }
 
   // ========== RENDER ==========
@@ -691,16 +699,19 @@
   }
 
   function updateStatus() {
-    if (!gameId) {
-      statusEl.innerHTML = '🎯 Click <span class="highlight">New Game</span> to start';
+    if (!roomId) {
+      statusEl.innerHTML = '🎯 Create or join a room to start';
+      return;
+    }
+    if (!conn || !conn.open) {
+      statusEl.innerHTML = '⏳ Waiting for opponent...';
       return;
     }
     if (gameOver) {
-      // status already set
       return;
     }
     if (!gameActive) {
-      statusEl.innerHTML = '⏳ Waiting for opponent to join... Share code: <span class="highlight">' + gameId + '</span>';
+      statusEl.innerHTML = '⏳ Waiting for game to start...';
       return;
     }
     if (myTurn) {
@@ -713,92 +724,22 @@
   function updatePlayers() {
     if (playerSymbol === 'X') {
       playerXEl.innerHTML = '❌ You (X)';
-      playerOEl.innerHTML = '⭕ ' + (gameActive ? 'Opponent (O)' : 'Waiting for opponent...');
-      playerOEl.className = gameActive ? 'opponent' : 'waiting';
+      playerOEl.innerHTML = '⭕ ' + (conn && conn.open ? 'Opponent (O)' : 'Waiting...');
+      playerOEl.className = (conn && conn.open) ? 'opponent' : 'waiting';
     } else {
-      playerXEl.innerHTML = '❌ ' + (gameActive ? 'Opponent (X)' : 'Waiting for opponent...');
-      playerXEl.className = gameActive ? 'opponent' : 'waiting';
+      playerXEl.innerHTML = '❌ ' + (conn && conn.open ? 'Opponent (X)' : 'Waiting...');
+      playerXEl.className = (conn && conn.open) ? 'opponent' : 'waiting';
       playerOEl.innerHTML = '⭕ You (O)';
       playerOEl.className = 'you';
     }
   }
 
-  // ========== SAVE ==========
-  function saveGame() {
-    const data = {
-      board: board,
-      gameId: gameId,
-      currentPlayer: currentPlayer,
-      gameActive: gameActive,
-      gameOver: gameOver,
-      playerSymbol: playerSymbol
-    };
-    localStorage.setItem('ttt_game', JSON.stringify(data));
-  }
-
-  // ========== ONLINE LIST ==========
-  function updateOnlineList() {
-    // We can't actually see other tabs directly, but we can simulate
-    // by checking if there are other BroadcastChannel instances.
-    // For simplicity, we'll just show a placeholder.
-    // In a real app, you'd use a server.
-    // We'll show that the feature exists but is local-only.
-    const tabs = getOtherTabs();
-    if (tabs.length === 0) {
-      onlinePlayersEl.innerHTML = `
-        <div style="color:#666; text-align:center; padding:8px;">
-          👋 No one else is online right now.<br>
-          <small>Open this page in another tab to test multiplayer!</small>
-        </div>
-      `;
-    } else {
-      let html = '';
-      tabs.forEach(tab => {
-        const isPlaying = tab.gameId === gameId && tab.gameId;
-        html += `
-          <div class="online-item">
-            <span class="name">${tab.name}</span>
-            <span class="status ${isPlaying ? '' : 'idle'}">
-              ${isPlaying ? '🎮 In your game' : '🟢 Available'}
-            </span>
-            ${!isPlaying && tab.gameId ? `<button onclick="joinGameById('${tab.gameId}')" class="secondary" style="padding:2px 10px;font-size:11px;">Join</button>` : ''}
-          </div>
-        `;
-      });
-      onlinePlayersEl.innerHTML = html;
+  function updateConnectionStatus(text) {
+    connectionStatusEl.textContent = text;
+    connectionStatusEl.className = 'connection-status';
+    if (text.includes('Connected')) {
+      connectionStatusEl.classList.add('connected');
     }
-  }
-
-  function getOtherTabs() {
-    // This is a simulation — in reality, we'd track via BroadcastChannel
-    // We'll just return an empty array and let the user know how it works.
-    // For demo, we'll check if there's any other tab with a game.
-    const saved = localStorage.getItem('ttt_game');
-    const otherTabs = [];
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        if (data.gameId && data.gameId !== gameId) {
-          otherTabs.push({
-            name: 'Player ' + data.gameId.slice(-3),
-            gameId: data.gameId
-          });
-        }
-      } catch (e) {}
-    }
-    // Add a dummy if no other tabs found but we want to show the UI
-    if (otherTabs.length === 0 && channelReady) {
-      // Check if we have a game but no opponent
-      if (gameId && !gameActive) {
-        // Show a "fake" player to demonstrate the UI
-        // In reality, they'd need to open another tab.
-        otherTabs.push({
-          name: '👤 (open this in another tab)',
-          gameId: gameId
-        });
-      }
-    }
-    return otherTabs;
   }
 
   // ========== TOAST ==========
@@ -812,13 +753,38 @@
     setTimeout(() => toast.remove(), 3000);
   }
 
-  // ========== START ==========
-  init();
+  // ========== CELL CLICKS ==========
+  cells.forEach((cell, idx) => {
+    cell.addEventListener('click', () => handleCellClick(idx));
+  });
 
-  // If there's a game code but no game active, show status
-  if (gameId && !gameActive) {
-    statusEl.innerHTML = '⏳ Waiting for opponent to join... Share code: <span class="highlight">' + gameId + '</span>';
+  // Enter key on join input
+  joinInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') joinRoom();
+  });
+
+  // ========== INIT ==========
+  initPeer();
+
+  // Show a help message after a moment
+  setTimeout(() => {
+    if (!roomId) {
+      statusEl.innerHTML = '🎯 Click <span class="highlight">Create Room</span> or enter a code to join';
+    }
+  }, 1000);
+
+  // Auto-join from URL param ?room=CODE
+  const params = new URLSearchParams(window.location.search);
+  const roomParam = params.get('room');
+  if (roomParam) {
+    setTimeout(() => {
+      joinInput.value = roomParam;
+      joinRoom();
+    }, 1500);
   }
+
+  console.log('🎮 Tic-Tac-Toe Multiplayer');
+  console.log('Share your room code with a friend!');
 </script>
 
 </body>
