@@ -1,383 +1,824 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🤡 Prank Link Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎮 Tic-Tac-Toe — Challenge a Friend</title>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-    body { max-width: 750px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
-    .card { background: #16213e; padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #0f3460; }
-    h1 { color: #e94560; margin-top: 0; }
-    label { display: block; margin: 12px 0 4px; font-weight: bold; color: #aaa; }
-    input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #0f3460; color: #fff; font-size: 15px; }
-    input::placeholder { color: #888; }
-    button { background: #e94560; color: #fff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 14px; transition: 0.2s; }
-    button:hover { background: #c73652; transform: scale(1.02); }
-    button.secondary { background: #0f3460; }
-    button.secondary:hover { background: #1a4a7a; }
-    .output { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 12px; word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .output a { color: #e94560; text-decoration: none; }
-    .output button { margin: 0; padding: 8px 16px; font-size: 13px; background: #1a1a2e; }
-    .badge { display: inline-block; background: #e94560; color: #fff; font-size: 12px; padding: 2px 12px; border-radius: 20px; margin-left: 8px; }
-    .warning { background: #2d1b1b; border-left: 4px solid #e94560; padding: 12px; border-radius: 6px; margin: 16px 0; color: #ff9999; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .row > * { flex: 1; min-width: 150px; }
-    .footer { text-align: center; color: #555; font-size: 13px; margin-top: 30px; }
-    .fake-email-box { background: #0a0a1a; padding: 16px; border-radius: 8px; border: 1px dashed #e94560; margin-top: 10px; }
-    .fake-email-box .label { color: #e94560; font-weight: bold; }
-    .code-display { background: #1a1a2e; padding: 10px 20px; border-radius: 6px; font-family: monospace; font-size: 28px; letter-spacing: 8px; display: inline-block; color: #0f0; margin: 10px 0; }
-    .hidden { display: none; }
-    .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-    .tab-bar button { margin: 0; padding: 10px 20px; background: #0f3460; flex: 1; min-width: 100px; }
-    .tab-bar button.active { background: #e94560; }
-    .prank-preview { background: #0a0a1a; padding: 20px; border-radius: 8px; text-align: center; margin-top: 10px; }
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background: #0f0f1a;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: #1a1a2e;
+      padding: 30px;
+      border-radius: 24px;
+      border: 1px solid #2a2a4a;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+    h1 {
+      text-align: center;
+      color: #e94560;
+      margin-top: 0;
+      font-size: 28px;
+    }
+    .sub {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .status-bar {
+      background: #0f0f1a;
+      padding: 14px 18px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 18px;
+      border-left: 4px solid #e94560;
+    }
+    .status-bar .highlight {
+      color: #e94560;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      aspect-ratio: 1/1;
+      max-width: 400px;
+      margin: 0 auto 20px;
+    }
+    .cell {
+      background: #0f0f1a;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.15s;
+      border: 2px solid #2a2a4a;
+      aspect-ratio: 1/1;
+      user-select: none;
+    }
+    .cell:hover:not(.taken) {
+      background: #252545;
+      border-color: #e94560;
+    }
+    .cell.taken {
+      cursor: default;
+      opacity: 0.9;
+    }
+    .cell.x {
+      color: #66d9ff;
+    }
+    .cell.o {
+      color: #ff66b2;
+    }
+    .cell.win {
+      background: #2a4a2a;
+      border-color: #66ff66;
+      box-shadow: 0 0 20px #66ff6644;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    button {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.15s;
+      flex: 1;
+      min-width: 120px;
+    }
+    button:hover {
+      background: #c73652;
+      transform: scale(1.02);
+    }
+    button.secondary {
+      background: #2a2a4a;
+    }
+    button.secondary:hover {
+      background: #3a3a5a;
+    }
+    button.green {
+      background: #2a7a4a;
+    }
+    button.green:hover {
+      background: #3a9a5a;
+    }
+    .players {
+      display: flex;
+      justify-content: space-between;
+      background: #0f0f1a;
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #aaa;
+    }
+    .players .you {
+      color: #66d9ff;
+    }
+    .players .opponent {
+      color: #ff66b2;
+    }
+    .players .waiting {
+      color: #666;
+    }
+    .game-code {
+      background: #0f0f1a;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: #e94560;
+      border: 1px dashed #2a2a4a;
+      margin: 10px 0;
+      word-break: break-all;
+    }
+    .game-code span {
+      color: #eee;
+    }
+    .online-list {
+      background: #0f0f1a;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 16px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .online-list .title {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #666;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .online-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    .online-item .name {
+      color: #ccc;
+    }
+    .online-item .status {
+      font-size: 12px;
+      color: #66ff66;
+    }
+    .online-item .status.idle {
+      color: #888;
+    }
+    .online-item button {
+      padding: 2px 12px;
+      font-size: 12px;
+      min-width: auto;
+      flex: 0;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a2a4a;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: bold;
+      border-left: 4px solid #e94560;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+    .footer {
+      text-align: center;
+      color: #444;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f0f1a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a2a4a;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>🤡 Prank Link Generator</h1>
-  <div class="warning">⚠️ This tool creates joke links. Only use with friends who know it's a prank.</div>
+<div class="container" id="app">
+  <h1>🎮 Tic-Tac-Toe</h1>
+  <div class="sub">Challenge someone on this site</div>
 
-  <!-- Tab bar -->
-  <div class="tab-bar">
-    <button class="active" onclick="switchTab('basic', this)">🔗 Basic</button>
-    <button onclick="switchTab('verify', this)">📧 Verification Prank</button>
-    <button onclick="switchTab('advanced', this)">⚙️ Advanced</button>
+  <!-- Game Code Display -->
+  <div class="game-code" id="gameCodeDisplay">
+    📋 Game: <span id="gameCode">—</span>
   </div>
 
-  <!-- TAB 1: BASIC -->
-  <div id="tab-basic">
-    <label>🔗 Base URL</label>
-    <input id="base" value="https://example.com" placeholder="e.g., https://yoursite.com">
-
-    <label>📝 Parameters (one per line)</label>
-    <textarea id="params" rows="2" placeholder="id=123&#10;ref=home">id=123
-ref=home</textarea>
-
-    <label>🎭 Prank Type</label>
-    <select id="prankType">
-      <option value="rickroll">🎵 Rickroll (Never Gonna Give You Up)</option>
-      <option value="trololo">🎶 Trololo Song</option>
-      <option value="scary">👻 Scary Maze (jumpscare)</option>
-      <option value="nathan">📺 "That's a lot of damage!"</option>
-      <option value="random">🎲 Random meme from list</option>
-    </select>
+  <!-- Players -->
+  <div class="players">
+    <span class="you" id="playerX">❌ You (X)</span>
+    <span class="waiting" id="playerO">⭕ Waiting for opponent...</span>
   </div>
 
-  <!-- TAB 2: VERIFICATION PRANK -->
-  <div id="tab-verify" class="hidden">
-    <label>🏢 Fake Company/Brand Name</label>
-    <input id="brandName" value="SecureVerify" placeholder="e.g., Bank of America, Amazon, etc.">
+  <!-- Status -->
+  <div class="status-bar" id="status">🎯 Click <span class="highlight">New Game</span> to start</div>
 
-    <label>📧 Fake Email to "Send" Code To</label>
-    <input id="fakeEmail" value="user@example.com" placeholder="victim@email.com">
+  <!-- Board -->
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
 
-    <label>🔢 Fake Verification Code (leave blank for random)</label>
-    <input id="fakeCode" placeholder="e.g., 482910 (or leave blank)">
+  <!-- Controls -->
+  <div class="controls">
+    <button onclick="createGame()">🆕 New Game</button>
+    <button onclick="joinGame()" class="secondary">🔗 Join with Code</button>
+    <button onclick="resetGame()" class="secondary">🔄 Reset</button>
+  </div>
 
-    <label>💬 Custom "Verification Failed" Messages (one per line)</label>
-    <textarea id="failMessages" rows="3">⚠️ Invalid code. Try again.
-🚫 Security alert: Code mismatch.
-⏳ Code expired. Request a new one.
-🔒 Too many attempts. Account locked? Just kidding 😉</textarea>
-
-    <div class="fake-email-box">
-      <div class="label">📨 Simulated Email Preview</div>
-      <div style="background:#0f3460; padding:12px; border-radius:6px; margin-top:8px; font-size:14px; color:#aaa;">
-        <strong>From:</strong> noreply@<span id="brandPreview">SecureVerify</span>.com<br>
-        <strong>Subject:</strong> Your verification code<br>
-        <strong>Message:</strong> Your code is: <span id="codePreview" class="code-display" style="font-size:20px; letter-spacing:4px;">------</span>
-      </div>
-      <button onclick="generateFakeCode()" class="secondary" style="margin-top:10px;">🔄 Generate New Fake Code</button>
+  <!-- Online Players -->
+  <div class="online-list" id="onlineList">
+    <div class="title">👥 Online & Available</div>
+    <div id="onlinePlayers">
+      <div style="color:#666; text-align:center; padding:8px;">No one else is online yet.<br>Open this page in another tab to test!</div>
     </div>
   </div>
 
-  <!-- TAB 3: ADVANCED -->
-  <div id="tab-advanced" class="hidden">
-    <label>📱 Add to Home Screen?</label>
-    <select id="addHome">
-      <option value="yes">✅ Yes — prompt to add to home screen first</option>
-      <option value="no">❌ No — just redirect</option>
-    </select>
-
-    <label>⏳ Delay before redirect (seconds)</label>
-    <input id="delay" type="number" value="2" min="0" max="10">
-
-    <label>🎨 Custom Page Title</label>
-    <input id="pageTitle" value="Verifying..." placeholder="e.g., Please wait...">
-
-    <label>🖼️ Custom Loading Message</label>
-    <input id="loadingMsg" value="Loading... 🎭" placeholder="e.g., Verifying your identity...">
-  </div>
-
-  <button onclick="generatePrankLink()" style="width:100%;">⚡ Generate Prank Link</button>
+  <div class="footer">💡 Open in multiple tabs to test multiplayer · All data stays in your browser</div>
 </div>
-
-<!-- RESULT CARD -->
-<div class="card" id="resultCard" style="display:none;">
-  <h3>✅ Your Prank Link</h3>
-  <div class="output" id="output">
-    <span id="linkDisplay">Loading...</span>
-    <button onclick="copyLink()">📋 Copy</button>
-  </div>
-  <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-    <button onclick="previewPrank()" class="secondary">👀 Preview (new tab)</button>
-    <button onclick="generateQR()" class="secondary">📱 QR Code</button>
-    <button onclick="testEmailSimulation()" class="secondary">📧 Test Email Flow</button>
-  </div>
-  <div id="qrArea" style="margin-top:12px; text-align:center;"></div>
-</div>
-
-<!-- STATS CARD -->
-<div class="card">
-  <h3>📊 Stats & Extra</h3>
-  <div class="row">
-    <div><label>Total links generated:</label> <span id="counter">0</span></div>
-    <div><label>Last generated:</label> <span id="lastTime">—</span></div>
-  </div>
-  <button onclick="clearAll()" class="secondary">🗑️ Reset counter</button>
-  <button onclick="generateRandomQuote()" class="secondary">💬 Random joke quote</button>
-  <div id="quoteDisplay" style="margin-top:10px; color:#aaa; font-style:italic;"></div>
-</div>
-
-<div class="footer">⚠️ For entertainment only. No actual emails are sent. Tell your friends it's a prank.</div>
 
 <script>
-  let counter = parseInt(localStorage.getItem('prankCounter')) || 0;
-  let lastLink = '';
-  let currentFakeCode = '';
+  // ============================================
+  //  TIC-TAC-TOE + MULTIPLAYER (same browser)
+  //  Uses BroadcastChannel API for tab-to-tab
+  //  + localStorage for persistence
+  // ============================================
 
-  // Tab switching
-  function switchTab(tab, btn) {
-    document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('#tab-basic, #tab-verify, #tab-advanced').forEach(el => el.classList.add('hidden'));
-    document.getElementById('tab-' + tab).classList.remove('hidden');
-  }
+  const BOARD_SIZE = 9;
+  let board = Array(9).fill(null);
+  let currentPlayer = 'X'; // 'X' always starts
+  let gameActive = false;
+  let gameId = null;
+  let playerSymbol = 'X'; // what this tab is
+  let opponentSymbol = 'O';
+  let gameOver = false;
+  let myTurn = false;
 
-  // Generate fake code
-  function generateFakeCode() {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    currentFakeCode = code;
-    document.getElementById('codePreview').textContent = code;
-    const brand = document.getElementById('brandName').value || 'SecureVerify';
-    document.getElementById('brandPreview').textContent = brand;
-  }
-  generateFakeCode();
+  // Channel for cross-tab communication
+  let channel = null;
+  let channelReady = false;
 
-  // Update brand preview on input
-  document.getElementById('brandName').addEventListener('input', function() {
-    document.getElementById('brandPreview').textContent = this.value || 'SecureVerify';
-  });
+  // DOM refs
+  const cells = document.querySelectorAll('.cell');
+  const statusEl = document.getElementById('status');
+  const gameCodeEl = document.getElementById('gameCode');
+  const playerXEl = document.getElementById('playerX');
+  const playerOEl = document.getElementById('playerO');
+  const onlinePlayersEl = document.getElementById('onlinePlayers');
 
-  function getPrankURL(type) {
-    const map = {
-      rickroll: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-      trololo: 'https://www.youtube.com/watch?v=oavMtUWDBTM',
-      scary: 'https://www.thescarymaze.com/',
-      nathan: 'https://www.youtube.com/watch?v=zBZ2K7xXy5g',
-      random: ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=oavMtUWDBTM', 'https://www.youtube.com/watch?v=zBZ2K7xXy5g', 'https://www.youtube.com/watch?v=YlUKcNNmywk', 'https://www.youtube.com/watch?v=6Ejga4kJUts'][Math.floor(Math.random() * 5)]
-    };
-    return map[type] || map.rickroll;
-  }
-
-  function generatePrankLink() {
-    const base = document.getElementById('base').value.trim();
-    const paramsRaw = document.getElementById('params').value;
-    const prank = document.getElementById('prankType').value;
-    const addHome = document.getElementById('addHome').value;
-    const delay = document.getElementById('delay').value || 2;
-    const pageTitle = document.getElementById('pageTitle').value || 'Verifying...';
-    const loadingMsg = document.getElementById('loadingMsg').value || 'Loading... 🎭';
-
-    // Verification settings
-    const brand = document.getElementById('brandName').value || 'SecureVerify';
-    const fakeEmail = document.getElementById('fakeEmail').value || 'user@example.com';
-    let fakeCode = document.getElementById('fakeCode').value.trim();
-    if (!fakeCode) {
-      fakeCode = Math.floor(100000 + Math.random() * 900000).toString();
+  // ========== INIT ==========
+  function init() {
+    // Try to restore game from localStorage
+    const saved = localStorage.getItem('ttt_game');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.board && data.gameId) {
+          board = data.board;
+          gameId = data.gameId;
+          currentPlayer = data.currentPlayer || 'X';
+          gameActive = data.gameActive || false;
+          gameOver = data.gameOver || false;
+          playerSymbol = data.playerSymbol || 'X';
+          opponentSymbol = playerSymbol === 'X' ? 'O' : 'X';
+          renderBoard();
+          updateStatus();
+          updatePlayers();
+          if (gameId) gameCodeEl.textContent = gameId;
+        }
+      } catch (e) {}
     }
-    const failMessages = document.getElementById('failMessages').value.split('\n').filter(m => m.trim());
 
-    const params = paramsRaw.split('\n').filter(p => p.trim());
-    let url = base;
-    if (params.length) url += '?' + params.map(p => encodeURIComponent(p.trim())).join('&');
+    // Setup BroadcastChannel
+    try {
+      channel = new BroadcastChannel('ttt_channel');
+      channel.onmessage = handleChannelMessage;
+      channelReady = true;
+      // Announce presence
+      announcePresence();
+    } catch (e) {
+      console.log('BroadcastChannel not supported — multiplayer limited');
+    }
 
-    const prankURL = getPrankURL(prank);
+    // Update online list periodically
+    updateOnlineList();
+    setInterval(updateOnlineList, 5000);
 
-    // Build the prank HTML with verification step
-    const prankHTML = `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width">
-${addHome === 'yes' ? '<meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="data:application/json,{}">' : ''}
-<title>${pageTitle}</title>
-<style>
-* { box-sizing:border-box; font-family:system-ui,sans-serif; }
-body { background:#0a0a1a; color:#eee; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; padding:20px; }
-.card { background:#16213e; padding:40px; border-radius:16px; max-width:450px; width:100%; text-align:center; border:1px solid #0f3460; }
-input { width:100%; padding:14px; font-size:24px; letter-spacing:8px; text-align:center; background:#0f3460; border:none; border-radius:8px; color:#fff; margin:10px 0; }
-input:focus { outline:2px solid #e94560; }
-button { background:#e94560; color:#fff; border:none; padding:14px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; width:100%; margin-top:10px; }
-button:hover { background:#c73652; }
-.error { color:#ff6666; font-size:14px; margin-top:8px; min-height:24px; }
-.hint { color:#666; font-size:13px; margin-top:8px; }
-.brand { color:#e94560; font-weight:bold; }
-.code-display { font-family:monospace; font-size:32px; letter-spacing:6px; background:#0a0a1a; padding:10px; border-radius:6px; display:inline-block; }
-.email-sent { color:#66ff66; font-size:14px; margin:8px 0; }
-</style>
-</head>
-<body>
-<div class="card" id="app">
-  <div style="font-size:48px;margin-bottom:10px;">📧</div>
-  <h2 style="color:#e94560;">${brand}</h2>
-  <p style="color:#aaa;">We sent a verification code to</p>
-  <p style="color:#fff;font-weight:bold;">${fakeEmail}</p>
-  <div class="email-sent" id="emailStatus">📨 Code sent: <span class="code-display">${fakeCode}</span></div>
-  <p style="color:#666;font-size:13px;">Enter the code to continue</p>
-  <input id="codeInput" type="text" maxlength="6" placeholder="------" autofocus>
-  <button id="verifyBtn">✅ Verify</button>
-  <div class="error" id="errorMsg"></div>
-  <div class="hint">💡 Hint: check the "email" above 😉</div>
-</div>
-<script>
-  const correctCode = '${fakeCode}';
-  const failMessages = ${JSON.stringify(failMessages)};
-  let attempts = 0;
-  const input = document.getElementById('codeInput');
-  const error = document.getElementById('errorMsg');
-  const verifyBtn = document.getElementById('verifyBtn');
+    // Click listeners
+    cells.forEach((cell, idx) => {
+      cell.addEventListener('click', () => handleCellClick(idx));
+    });
 
-  // Auto-focus and auto-submit on 6 digits
-  input.addEventListener('input', function() {
-    this.value = this.value.replace(/\\D/g, '').slice(0,6);
-    if (this.value.length === 6) verifyCode();
-  });
+    // Auto-join if we have a gameId
+    if (gameId && !gameActive) {
+      // We're in a game but not active — try to join
+      joinGameById(gameId);
+    }
+  }
 
-  verifyBtn.addEventListener('click', verifyCode);
+  // ========== CHANNEL MESSAGES ==========
+  function handleChannelMessage(e) {
+    const msg = e.data;
+    if (!msg || !msg.type) return;
 
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') verifyCode();
-  });
+    switch (msg.type) {
+      case 'presence':
+        // Someone is online
+        updateOnlineList();
+        break;
 
-  function verifyCode() {
-    const val = input.value.trim();
-    if (!val) {
-      error.textContent = 'Please enter the code.';
+      case 'move':
+        // Opponent made a move
+        if (msg.gameId === gameId && msg.symbol !== playerSymbol) {
+          if (!gameOver && gameActive) {
+            board[msg.index] = msg.symbol;
+            currentPlayer = msg.symbol === 'X' ? 'O' : 'X';
+            renderBoard();
+            checkGameState();
+            saveGame();
+            updateStatus();
+            announcePresence();
+          }
+        }
+        break;
+
+      case 'game_created':
+        // Someone created a new game — refresh list
+        updateOnlineList();
+        break;
+
+      case 'game_joined':
+        // Someone joined our game
+        if (msg.gameId === gameId && msg.joinerSymbol === opponentSymbol) {
+          gameActive = true;
+          gameOver = false;
+          myTurn = (playerSymbol === 'X'); // X always starts
+          saveGame();
+          updateStatus();
+          updatePlayers();
+          showToast('🎉 Opponent joined! Game on!');
+        }
+        break;
+
+      case 'game_reset':
+        if (msg.gameId === gameId) {
+          resetBoard(true);
+          showToast('🔄 Game was reset by opponent');
+        }
+        break;
+
+      case 'game_abandoned':
+        if (msg.gameId === gameId) {
+          gameActive = false;
+          gameOver = true;
+          statusEl.innerHTML = '😢 Opponent left the game. Start a new one.';
+          saveGame();
+        }
+        break;
+
+      case 'ping':
+        // Respond to ping
+        if (channelReady) {
+          channel.postMessage({ type: 'pong', from: 'tab_' + Date.now() });
+        }
+        break;
+    }
+  }
+
+  function announcePresence() {
+    if (!channelReady) return;
+    channel.postMessage({
+      type: 'presence',
+      gameId: gameId || null,
+      timestamp: Date.now()
+    });
+  }
+
+  // ========== CREATE / JOIN ==========
+  function createGame() {
+    // Generate a short game code
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    gameId = code;
+    gameCodeEl.textContent = gameId;
+
+    // Reset board
+    resetBoard(true);
+    gameActive = false;
+    gameOver = false;
+    playerSymbol = 'X';
+    opponentSymbol = 'O';
+    currentPlayer = 'X';
+    myTurn = true;
+
+    // Save
+    saveGame();
+    updatePlayers();
+    updateStatus();
+    renderBoard();
+
+    showToast('🆕 Game created! Share the code: ' + gameId);
+    announcePresence();
+
+    // Broadcast that a game was created
+    if (channelReady) {
+      channel.postMessage({ type: 'game_created', gameId: gameId });
+    }
+
+    // Auto-join check — maybe someone is waiting
+    setTimeout(() => {
+      // See if any other tab has this game ID already
+      updateOnlineList();
+    }, 500);
+  }
+
+  function joinGame() {
+    const code = prompt('Enter the game code:', gameId || '');
+    if (!code || code.trim().length < 4) return;
+    joinGameById(code.trim().toUpperCase());
+  }
+
+  function joinGameById(code) {
+    // Check if we can join — we'll just set our state
+    // In a real implementation, we'd check if the game exists.
+    // Here we assume it does.
+    gameId = code;
+    gameCodeEl.textContent = gameId;
+
+    // We join as 'O'
+    playerSymbol = 'O';
+    opponentSymbol = 'X';
+    gameActive = true;
+    gameOver = false;
+    myTurn = false; // X goes first
+    currentPlayer = 'X';
+
+    // Reset board
+    board = Array(9).fill(null);
+    renderBoard();
+
+    saveGame();
+    updatePlayers();
+    updateStatus();
+
+    showToast('🔗 Joined game ' + gameId + ' as O');
+
+    // Broadcast join
+    if (channelReady) {
+      channel.postMessage({
+        type: 'game_joined',
+        gameId: gameId,
+        joinerSymbol: 'O'
+      });
+    }
+    announcePresence();
+  }
+
+  // ========== GAME LOGIC ==========
+  function handleCellClick(index) {
+    if (!gameActive || gameOver) {
+      showToast('⏳ Game not active. Start or join a game first.');
       return;
     }
-    if (val === correctCode) {
-      error.style.color = '#66ff66';
-      error.textContent = '✅ Verified! Redirecting...';
-      verifyBtn.disabled = true;
-      // Show the actual prank URL before redirect? Nah, just go.
-      setTimeout(() => {
-        window.location.href = '${prankURL}';
-      }, 1500);
-    } else {
-      attempts++;
-      const msg = failMessages.length > 0 
-        ? failMessages[attempts % failMessages.length] 
-        : '❌ Invalid code. Try again.';
-      error.style.color = '#ff6666';
-      error.textContent = msg + ' (attempt ' + attempts + ')';
-      input.value = '';
-      input.focus();
-      // If too many attempts, add extra spice
-      if (attempts >= 5) {
-        error.textContent = '🔒 ' + (failMessages[0] || 'Too many attempts. But this is a prank, so...') + ' 😂';
-        setTimeout(() => {
-          window.location.href = '${prankURL}';
-        }, 2000);
+    if (!myTurn) {
+      showToast('⏳ Waiting for opponent...');
+      return;
+    }
+    if (board[index] !== null) {
+      showToast('❌ That cell is taken!');
+      return;
+    }
+
+    // Make move
+    board[index] = playerSymbol;
+    renderBoard();
+
+    // Check win
+    const win = checkWin(board);
+    if (win) {
+      gameOver = true;
+      gameActive = false;
+      highlightWin(win);
+      statusEl.innerHTML = '🏆 You win! 🎉';
+      saveGame();
+      announcePresence();
+      return;
+    }
+
+    // Check tie
+    if (board.every(c => c !== null)) {
+      gameOver = true;
+      gameActive = false;
+      statusEl.innerHTML = '🤝 It\'s a tie!';
+      saveGame();
+      announcePresence();
+      return;
+    }
+
+    // Switch turn
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    myTurn = (currentPlayer === playerSymbol);
+    updateStatus();
+    saveGame();
+    announcePresence();
+
+    // Broadcast move
+    if (channelReady) {
+      channel.postMessage({
+        type: 'move',
+        gameId: gameId,
+        index: index,
+        symbol: playerSymbol
+      });
+    }
+
+    // Check if opponent is still there (pong test)
+    if (channelReady) {
+      channel.postMessage({ type: 'ping' });
+    }
+  }
+
+  function checkWin(board) {
+    const lines = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for (let line of lines) {
+      const [a,b,c] = line;
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return line;
+      }
+    }
+    return null;
+  }
+
+  function highlightWin(line) {
+    if (!line) return;
+    line.forEach(idx => {
+      cells[idx].classList.add('win');
+    });
+    // Mark win on board for render
+  }
+
+  function checkGameState() {
+    const win = checkWin(board);
+    if (win) {
+      gameOver = true;
+      gameActive = false;
+      highlightWin(win);
+      const winner = board[win[0]];
+      if (winner === playerSymbol) {
+        statusEl.innerHTML = '🏆 You win! 🎉';
+      } else if (winner) {
+        statusEl.innerHTML = '😅 Opponent wins!';
+      }
+      saveGame();
+      return true;
+    }
+    if (board.every(c => c !== null)) {
+      gameOver = true;
+      gameActive = false;
+      statusEl.innerHTML = '🤝 It\'s a tie!';
+      saveGame();
+      return true;
+    }
+    return false;
+  }
+
+  function resetBoard(silent = false) {
+    board = Array(9).fill(null);
+    gameOver = false;
+    currentPlayer = 'X';
+    myTurn = (playerSymbol === 'X');
+    cells.forEach(c => c.classList.remove('win', 'x', 'o', 'taken'));
+    renderBoard();
+    updateStatus();
+    if (!silent) {
+      saveGame();
+      if (channelReady) {
+        channel.postMessage({ type: 'game_reset', gameId: gameId });
       }
     }
   }
 
-  // Also allow clicking the code display to auto-fill (for the prankster)
-  document.querySelector('.code-display')?.addEventListener('click', function() {
-    input.value = this.textContent;
-    verifyCode();
-  });
-
-  // Countdown to auto-redirect if they're too slow (optional — 30s)
-  setTimeout(() => {
-    if (!document.querySelector('#verifyBtn[disabled]')) {
-      window.location.href = '${prankURL}';
+  function resetGame() {
+    if (!gameId) {
+      createGame();
+      return;
     }
-  }, 30000);
-<\/script>
-</body>
-</html>`;
-
-    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(prankHTML);
-    lastLink = encoded;
-
-    document.getElementById('linkDisplay').innerHTML = `<a href="${encoded}" target="_blank">${encoded.substring(0, 70)}...</a>`;
-    document.getElementById('resultCard').style.display = 'block';
-
-    counter++;
-    localStorage.setItem('prankCounter', counter);
-    document.getElementById('counter').textContent = counter;
-    document.getElementById('lastTime').textContent = new Date().toLocaleTimeString();
-
-    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+    resetBoard(false);
+    showToast('🔄 Game reset');
   }
 
-  function copyLink() {
-    navigator.clipboard.writeText(lastLink).then(() => {
-      const btn = event.target;
-      const orig = btn.textContent;
-      btn.textContent = '✅ Copied!';
-      setTimeout(() => btn.textContent = orig, 2000);
-    }).catch(() => {
-      const area = document.createElement('textarea');
-      area.value = lastLink;
-      document.body.appendChild(area);
-      area.select();
-      document.execCommand('copy');
-      area.remove();
+  // ========== RENDER ==========
+  function renderBoard() {
+    cells.forEach((cell, idx) => {
+      const val = board[idx];
+      cell.textContent = val || '';
+      cell.className = 'cell';
+      if (val) {
+        cell.classList.add('taken', val === 'X' ? 'x' : 'o');
+      }
     });
   }
 
-  function previewPrank() {
-    if (lastLink) window.open(lastLink, '_blank');
+  function updateStatus() {
+    if (!gameId) {
+      statusEl.innerHTML = '🎯 Click <span class="highlight">New Game</span> to start';
+      return;
+    }
+    if (gameOver) {
+      // status already set
+      return;
+    }
+    if (!gameActive) {
+      statusEl.innerHTML = '⏳ Waiting for opponent to join... Share code: <span class="highlight">' + gameId + '</span>';
+      return;
+    }
+    if (myTurn) {
+      statusEl.innerHTML = '🎯 Your turn (' + playerSymbol + ')';
+    } else {
+      statusEl.innerHTML = '⏳ Waiting for opponent...';
+    }
   }
 
-  function generateQR() {
-    const area = document.getElementById('qrArea');
-    if (!lastLink) return;
-    const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastLink)}`;
-    area.innerHTML = `<img src="${qrURL}" style="border-radius:12px;border:2px solid #0f3460;">`;
+  function updatePlayers() {
+    if (playerSymbol === 'X') {
+      playerXEl.innerHTML = '❌ You (X)';
+      playerOEl.innerHTML = '⭕ ' + (gameActive ? 'Opponent (O)' : 'Waiting for opponent...');
+      playerOEl.className = gameActive ? 'opponent' : 'waiting';
+    } else {
+      playerXEl.innerHTML = '❌ ' + (gameActive ? 'Opponent (X)' : 'Waiting for opponent...');
+      playerXEl.className = gameActive ? 'opponent' : 'waiting';
+      playerOEl.innerHTML = '⭕ You (O)';
+      playerOEl.className = 'you';
+    }
   }
 
-  function testEmailSimulation() {
-    alert('📧 No actual email sent! This is a simulation.\n\nThe victim will see a fake "email" with the code displayed right on the page.\nThey just need to copy it from the screen.\n\nIt\'s a SOCIAL PRANK — they\'ll think they need to check their email, but the code is right there all along! 😂');
+  // ========== SAVE ==========
+  function saveGame() {
+    const data = {
+      board: board,
+      gameId: gameId,
+      currentPlayer: currentPlayer,
+      gameActive: gameActive,
+      gameOver: gameOver,
+      playerSymbol: playerSymbol
+    };
+    localStorage.setItem('ttt_game', JSON.stringify(data));
   }
 
-  function clearAll() {
-    localStorage.removeItem('prankCounter');
-    counter = 0;
-    document.getElementById('counter').textContent = '0';
+  // ========== ONLINE LIST ==========
+  function updateOnlineList() {
+    // We can't actually see other tabs directly, but we can simulate
+    // by checking if there are other BroadcastChannel instances.
+    // For simplicity, we'll just show a placeholder.
+    // In a real app, you'd use a server.
+    // We'll show that the feature exists but is local-only.
+    const tabs = getOtherTabs();
+    if (tabs.length === 0) {
+      onlinePlayersEl.innerHTML = `
+        <div style="color:#666; text-align:center; padding:8px;">
+          👋 No one else is online right now.<br>
+          <small>Open this page in another tab to test multiplayer!</small>
+        </div>
+      `;
+    } else {
+      let html = '';
+      tabs.forEach(tab => {
+        const isPlaying = tab.gameId === gameId && tab.gameId;
+        html += `
+          <div class="online-item">
+            <span class="name">${tab.name}</span>
+            <span class="status ${isPlaying ? '' : 'idle'}">
+              ${isPlaying ? '🎮 In your game' : '🟢 Available'}
+            </span>
+            ${!isPlaying && tab.gameId ? `<button onclick="joinGameById('${tab.gameId}')" class="secondary" style="padding:2px 10px;font-size:11px;">Join</button>` : ''}
+          </div>
+        `;
+      });
+      onlinePlayersEl.innerHTML = html;
+    }
   }
 
-  function generateRandomQuote() {
-    const quotes = [
-      "It's a prank, bro!",
-      "Never gonna give you up...",
-      "This is fine 🔥",
-      "404: Sanity not found",
-      "I'm a bot, beep boop",
-      "You've been tricked! 🎉",
-      "Why are you still reading?",
-      "Send this to a friend 😉",
-      "The code is literally on the screen 🤦",
-      "Email? What email? 😂"
-    ];
-    document.getElementById('quoteDisplay').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  function getOtherTabs() {
+    // This is a simulation — in reality, we'd track via BroadcastChannel
+    // We'll just return an empty array and let the user know how it works.
+    // For demo, we'll check if there's any other tab with a game.
+    const saved = localStorage.getItem('ttt_game');
+    const otherTabs = [];
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.gameId && data.gameId !== gameId) {
+          otherTabs.push({
+            name: 'Player ' + data.gameId.slice(-3),
+            gameId: data.gameId
+          });
+        }
+      } catch (e) {}
+    }
+    // Add a dummy if no other tabs found but we want to show the UI
+    if (otherTabs.length === 0 && channelReady) {
+      // Check if we have a game but no opponent
+      if (gameId && !gameActive) {
+        // Show a "fake" player to demonstrate the UI
+        // In reality, they'd need to open another tab.
+        otherTabs.push({
+          name: '👤 (open this in another tab)',
+          gameId: gameId
+        });
+      }
+    }
+    return otherTabs;
   }
 
-  document.getElementById('counter').textContent = counter;
+  // ========== TOAST ==========
+  function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  // ========== START ==========
+  init();
+
+  // If there's a game code but no game active, show status
+  if (gameId && !gameActive) {
+    statusEl.innerHTML = '⏳ Waiting for opponent to join... Share code: <span class="highlight">' + gameId + '</span>';
+  }
 </script>
 
 </body>
