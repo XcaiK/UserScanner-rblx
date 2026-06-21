@@ -3,789 +3,743 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎮 Tic-Tac-Toe — Play with Friends</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <title>👻 The Dark Maze — Find the Keys</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, sans-serif;
-    }
-    body {
-      background: #0f0f1a;
-      color: #eee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 520px;
-      width: 100%;
-      background: #1a1a2e;
-      padding: 28px;
-      border-radius: 24px;
-      border: 1px solid #2a2a4a;
-    }
-    h1 {
-      text-align: center;
-      color: #e94560;
-      margin: 0 0 4px 0;
-      font-size: 26px;
-    }
-    .sub {
-      text-align: center;
-      color: #888;
-      font-size: 13px;
-      margin-bottom: 18px;
-    }
-    .status-bar {
-      background: #0f0f1a;
-      padding: 12px 16px;
-      border-radius: 12px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 16px;
-      border-left: 4px solid #e94560;
-      min-height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .status-bar .highlight {
-      color: #e94560;
-    }
-    .board {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      aspect-ratio: 1/1;
-      max-width: 380px;
-      margin: 0 auto 16px;
-    }
-    .cell {
-      background: #0f0f1a;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 52px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.15s;
-      border: 2px solid #2a2a4a;
-      aspect-ratio: 1/1;
-      user-select: none;
-    }
-    .cell:hover:not(.taken) {
-      background: #252545;
-      border-color: #e94560;
-    }
-    .cell.taken {
-      cursor: default;
-      opacity: 0.9;
-    }
-    .cell.x {
-      color: #66d9ff;
-    }
-    .cell.o {
-      color: #ff66b2;
-    }
-    .cell.win {
-      background: #2a4a2a;
-      border-color: #66ff66;
-      box-shadow: 0 0 20px #66ff6644;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin: 12px 0;
-    }
-    button {
-      background: #e94560;
+    * { margin: 0; padding: 0; overflow: hidden; }
+    body { background: #000; font-family: 'Segoe UI', system-ui, sans-serif; }
+    canvas { display: block; }
+    #ui {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       color: #fff;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.15s;
-      flex: 1;
-      min-width: 100px;
-    }
-    button:hover {
-      background: #c73652;
-      transform: scale(1.02);
-    }
-    button.secondary {
-      background: #2a2a4a;
-    }
-    button.secondary:hover {
-      background: #3a3a5a;
-    }
-    button.green {
-      background: #2a7a4a;
-    }
-    button.green:hover {
-      background: #3a9a5a;
-    }
-    .room-box {
-      background: #0f0f1a;
-      padding: 14px;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 24px;
       border-radius: 12px;
+      font-size: 18px;
+      z-index: 10;
       text-align: center;
-      margin: 10px 0;
-      border: 1px dashed #2a2a4a;
-    }
-    .room-box .code {
-      font-family: monospace;
-      font-size: 28px;
-      letter-spacing: 4px;
-      color: #e94560;
+      border: 1px solid #333;
+      pointer-events: none;
+      backdrop-filter: blur(4px);
       font-weight: bold;
-    }
-    .room-box .label {
-      color: #666;
-      font-size: 12px;
-      text-transform: uppercase;
       letter-spacing: 1px;
     }
-    .join-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .join-row input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #0f0f1a;
-      color: #fff;
-      font-size: 18px;
-      text-align: center;
-      letter-spacing: 4px;
-      font-family: monospace;
-    }
-    .join-row input::placeholder {
-      color: #444;
-      font-size: 14px;
-      letter-spacing: 0;
-    }
-    .players {
-      display: flex;
-      justify-content: space-between;
-      background: #0f0f1a;
-      border-radius: 12px;
-      padding: 10px 16px;
-      margin-bottom: 12px;
-      font-size: 14px;
-      color: #aaa;
-    }
-    .players .you {
-      color: #66d9ff;
-    }
-    .players .opponent {
-      color: #ff66b2;
-    }
-    .players .waiting {
-      color: #666;
-    }
-    .footer {
-      text-align: center;
-      color: #444;
-      font-size: 11px;
-      margin-top: 16px;
-    }
-    .toast {
+    #ui span { color: #ffcc00; }
+    #keys-display {
       position: fixed;
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background: #2a2a4a;
       color: #fff;
-      padding: 12px 24px;
-      border-radius: 12px;
+      background: rgba(0,0,0,0.8);
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-size: 22px;
+      z-index: 10;
+      border: 1px solid #444;
+      backdrop-filter: blur(4px);
       font-weight: bold;
-      border-left: 4px solid #e94560;
-      z-index: 999;
-      animation: fadeUp 0.3s ease;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      letter-spacing: 2px;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #keys-display .key-icon {
+      color: #ffcc00;
+      font-size: 28px;
     }
-    .connection-status {
-      font-size: 12px;
-      color: #666;
-      text-align: center;
-      margin: 4px 0 10px 0;
+    #keys-display .count {
+      color: #ffcc00;
     }
-    .connection-status.connected {
-      color: #66ff66;
+    #crosshair {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.3);
+      font-size: 30px;
+      z-index: 5;
+      pointer-events: none;
+      font-family: monospace;
     }
-    .hidden {
-      display: none !important;
+    #win-screen, #lose-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      flex-direction: column;
+      backdrop-filter: blur(8px);
+    }
+    #win-screen h1, #lose-screen h1 {
+      color: #ffcc00;
+      font-size: 64px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 40px #ffcc0044;
+    }
+    #win-screen p, #lose-screen p {
+      color: #aaa;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    #win-screen button, #lose-screen button {
+      padding: 14px 40px;
+      font-size: 20px;
+      border: none;
+      border-radius: 12px;
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #win-screen button:hover, #lose-screen button:hover {
+      transform: scale(1.05);
+      background: #ffe066;
+    }
+    #controls-hint {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #444;
+      font-size: 13px;
+      z-index: 5;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 16px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+    }
+    .flicker {
+      animation: flicker 0.15s infinite alternate;
+    }
+    @keyframes flicker {
+      0% { opacity: 0.9; }
+      100% { opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>🎮 Tic-Tac-Toe</h1>
-  <div class="sub">Play with anyone, anywhere</div>
+<div id="ui">👻 Find <span>3 keys</span> to escape the maze</div>
 
-  <!-- Room -->
-  <div class="room-box" id="roomBox">
-    <div class="label">🏠 Your Room Code</div>
-    <div class="code" id="roomCode">—</div>
-    <div style="margin-top:6px; font-size:13px; color:#666;" id="connectionStatus">🔴 Not connected</div>
-    <button onclick="copyRoomCode()" class="secondary" style="margin-top:8px; padding:6px 12px; font-size:12px; flex:0;">📋 Copy Code</button>
-  </div>
-
-  <!-- Join section -->
-  <div style="display:flex; gap:8px; margin:10px 0;">
-    <input id="joinInput" placeholder="Enter room code to join" style="flex:1; padding:12px; border-radius:10px; border:none; background:#0f0f1a; color:#fff; font-family:monospace; font-size:18px; text-align:center; letter-spacing:2px;">
-    <button onclick="joinRoom()" style="flex:0; padding:12px 24px;">Join</button>
-  </div>
-
-  <!-- Players -->
-  <div class="players">
-    <span class="you" id="playerX">❌ You (X)</span>
-    <span class="waiting" id="playerO">⭕ Waiting for opponent...</span>
-  </div>
-
-  <!-- Status -->
-  <div class="status-bar" id="status">🎯 Create or join a room to start</div>
-
-  <!-- Board -->
-  <div class="board" id="board">
-    <div class="cell" data-index="0"></div>
-    <div class="cell" data-index="1"></div>
-    <div class="cell" data-index="2"></div>
-    <div class="cell" data-index="3"></div>
-    <div class="cell" data-index="4"></div>
-    <div class="cell" data-index="5"></div>
-    <div class="cell" data-index="6"></div>
-    <div class="cell" data-index="7"></div>
-    <div class="cell" data-index="8"></div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls">
-    <button onclick="createRoom()">🆕 Create Room</button>
-    <button onclick="resetGame()" class="secondary">🔄 Reset</button>
-    <button onclick="leaveGame()" class="secondary" style="background:#4a1a1a;">🚪 Leave</button>
-  </div>
-
-  <div class="footer">💡 Send the room code to a friend. They paste it and click Join.</div>
+<div id="keys-display">
+  <span class="key-icon">🔑</span>
+  <span>Keys: <span class="count" id="keyCount">0</span> / 3</span>
+  <span style="color:#666;margin-left:10px;">|</span>
+  <span id="door-status" style="color:#ff4444;">🚪 Locked</span>
 </div>
 
+<div id="crosshair">+</div>
+<div id="controls-hint">WASD · Mouse to look · Click to lock mouse</div>
+
+<div id="win-screen">
+  <h1>🎉 ESCAPED!</h1>
+  <p>You found all 3 keys and escaped the maze!</p>
+  <button onclick="location.reload()">🔄 Play Again</button>
+</div>
+
+<div id="lose-screen">
+  <h1>💀 GAME OVER</h1>
+  <p>You were caught...</p>
+  <button onclick="location.reload()">🔄 Try Again</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+</script>
 <script>
   // ============================================================
-  //  TIC-TAC-TOE with PEERJS — real multiplayer across devices
+  //  THE DARK MAZE — 3D First-Person Horror with Keys
+  //  Uses Three.js with PointerLock, fog, flickering lights
   // ============================================================
 
-  let peer = null;
-  let conn = null;
-  let roomId = null;
-  let isHost = false;
+  // ---------- SETUP ----------
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a12);
+  scene.fog = new THREE.FogExp2(0x0a0a12, 0.035);
 
-  let board = Array(9).fill(null);
-  let currentPlayer = 'X';
-  let playerSymbol = 'X';
-  let opponentSymbol = 'O';
-  let gameActive = false;
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
+  camera.position.set(1.5, 1.7, 1.5);
+  camera.lookAt(2, 1.7, 2);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.8;
+  document.body.prepend(renderer.domElement);
+
+  // ---------- LIGHTS ----------
+  const ambient = new THREE.AmbientLight(0x222244, 0.3);
+  scene.add(ambient);
+
+  // Flickering main light
+  const mainLight = new THREE.PointLight(0xff8844, 0.8, 15);
+  mainLight.position.set(0, 5, 0);
+  mainLight.castShadow = true;
+  scene.add(mainLight);
+
+  // Additional dim lights
+  const fillLight = new THREE.PointLight(0x4466ff, 0.2, 10);
+  fillLight.position.set(-3, 2, -3);
+  scene.add(fillLight);
+
+  // Small red emergency light
+  const redLight = new THREE.PointLight(0xff2222, 0.15, 8);
+  redLight.position.set(5, 1, 5);
+  scene.add(redLight);
+
+  // ---------- FLOOR ----------
+  const floorGeo = new THREE.PlaneGeometry(40, 40);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a2a,
+    roughness: 0.9,
+    metalness: 0.0,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Grid texture for floor (just a subtle effect)
+  const gridHelper = new THREE.GridHelper(40, 40, 0x333355, 0x222244);
+  gridHelper.position.y = 0.01;
+  scene.add(gridHelper);
+
+  // ---------- MAZE WALLS ----------
+  // Simple maze layout: 10x10 grid with walls
+  // 1 = wall, 0 = path, 2 = key position, 3 = exit
+  const mazeLayout = [
+    [1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,0,1],
+    [1,0,1,0,1,0,1,1,0,1],
+    [1,0,1,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,0,1,0,1],
+    [1,0,0,0,0,1,0,0,0,1],
+    [1,1,1,0,1,1,1,1,0,1],
+    [1,0,0,0,1,0,0,0,0,1],
+    [1,0,1,0,0,0,1,1,0,1],
+    [1,1,1,1,1,1,1,1,1,1]
+  ];
+
+  const wallHeight = 2.8;
+  const wallThickness = 0.2;
+  const cellSize = 1;
+  const offset = -4.5; // center the maze
+
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2a4a,
+    roughness: 0.8,
+    metalness: 0.2,
+    emissive: 0x111122,
+    emissiveIntensity: 0.05,
+  });
+
+  const wallMatTop = new THREE.MeshStandardMaterial({
+    color: 0x222244,
+    roughness: 0.9,
+    metalness: 0.0,
+  });
+
+  const wallGroup = new THREE.Group();
+
+  for (let row = 0; row < mazeLayout.length; row++) {
+    for (let col = 0; col < mazeLayout[row].length; col++) {
+      if (mazeLayout[row][col] === 1) {
+        const x = col + offset;
+        const z = row + offset;
+
+        // Main wall block
+        const block = new THREE.Mesh(
+          new THREE.BoxGeometry(cellSize, wallHeight, cellSize),
+          wallMat
+        );
+        block.position.set(x, wallHeight/2, z);
+        block.castShadow = true;
+        block.receiveShadow = true;
+        wallGroup.add(block);
+
+        // Slightly darker top
+        const top = new THREE.Mesh(
+          new THREE.BoxGeometry(cellSize * 0.9, 0.05, cellSize * 0.9),
+          wallMatTop
+        );
+        top.position.set(x, wallHeight, z);
+        wallGroup.add(top);
+      }
+    }
+  }
+  scene.add(wallGroup);
+
+  // ---------- KEYS ----------
+  const keyPositions = [
+    { x: -2.5, z: -2.5 },
+    { x: 2.5, z: 0.5 },
+    { x: -1.5, z: 3.5 }
+  ];
+
+  const keys = [];
+  const keyMat = new THREE.MeshStandardMaterial({
+    color: 0xffcc00,
+    emissive: 0xff8800,
+    emissiveIntensity: 0.3,
+    metalness: 0.6,
+    roughness: 0.3,
+  });
+
+  keyPositions.forEach((pos, i) => {
+    const keyGroup = new THREE.Group();
+
+    // Key shaft
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8),
+      keyMat
+    );
+    shaft.rotation.x = Math.PI / 2;
+    shaft.position.y = 0.25;
+    keyGroup.add(shaft);
+
+    // Key head (circle)
+    const head = new THREE.Mesh(
+      new THREE.TorusGeometry(0.12, 0.04, 8, 12),
+      keyMat
+    );
+    head.position.set(0.3, 0.25, 0);
+    head.rotation.y = Math.PI / 2;
+    keyGroup.add(head);
+
+    // Glow aura
+    const glow = new THREE.Mesh(
+      new THREE.SphereGeometry(0.15, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xffaa00,
+        transparent: true,
+        opacity: 0.15,
+      })
+    );
+    glow.position.y = 0.25;
+    keyGroup.add(glow);
+
+    // Point light on key
+    const keyLight = new THREE.PointLight(0xffaa00, 0.3, 2);
+    keyLight.position.y = 0.5;
+    keyGroup.add(keyLight);
+
+    keyGroup.position.set(pos.x, 0.5, pos.z);
+    keyGroup.userData = { collected: false, index: i };
+    scene.add(keyGroup);
+    keys.push(keyGroup);
+  });
+
+  // ---------- EXIT DOOR ----------
+  const doorGroup = new THREE.Group();
+  doorGroup.position.set(3.5, 0, -3.5);
+
+  // Door frame
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0x333355,
+    roughness: 0.5,
+    metalness: 0.3,
+  });
+  const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.2, 2.6, 0.2),
+    frameMat
+  );
+  frame.position.y = 1.3;
+  doorGroup.add(frame);
+
+  // Door itself
+  const doorMat = new THREE.MeshStandardMaterial({
+    color: 0x4a2a2a,
+    roughness: 0.7,
+    metalness: 0.1,
+    emissive: 0x220000,
+    emissiveIntensity: 0.1,
+  });
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 2.2, 0.05),
+    doorMat
+  );
+  door.position.set(0, 1.1, 0.05);
+  doorGroup.add(door);
+
+  // Door handle
+  const handleMat = new THREE.MeshStandardMaterial({
+    color: 0xffaa00,
+    metalness: 0.8,
+    roughness: 0.2,
+  });
+  const handle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.06, 8, 8),
+    handleMat
+  );
+  handle.position.set(0.35, 1.1, 0.1);
+  doorGroup.add(handle);
+
+  // "EXIT" sign glow
+  const exitLight = new THREE.PointLight(0xff4444, 0.5, 3);
+  exitLight.position.set(0, 2.2, 0);
+  doorGroup.add(exitLight);
+
+  // Sign text (using a small box with emissive)
+  const signMat = new THREE.MeshStandardMaterial({
+    color: 0xff2222,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.3,
+  });
+  const sign = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.2, 0.02),
+    signMat
+  );
+  sign.position.set(0, 2.3, 0.1);
+  doorGroup.add(sign);
+
+  scene.add(doorGroup);
+
+  // Door state
+  let keysCollected = 0;
+  let doorUnlocked = false;
   let gameOver = false;
-  let myTurn = false;
 
-  const cells = document.querySelectorAll('.cell');
-  const statusEl = document.getElementById('status');
-  const roomCodeEl = document.getElementById('roomCode');
-  const connectionStatusEl = document.getElementById('connectionStatus');
-  const playerXEl = document.getElementById('playerX');
-  const playerOEl = document.getElementById('playerO');
-  const joinInput = document.getElementById('joinInput');
+  // ---------- ENEMY / SPOOKY PRESENCE ----------
+  // A floating red glowing orb that patrols
+  const enemyGroup = new THREE.Group();
 
-  let peerId = null;
+  const enemyMat = new THREE.MeshStandardMaterial({
+    color: 0xff2222,
+    emissive: 0xff0000,
+    emissiveIntensity: 0.5,
+    transparent: true,
+    opacity: 0.7,
+  });
+  const enemyBody = new THREE.Mesh(
+    new THREE.SphereGeometry(0.25, 12, 12),
+    enemyMat
+  );
+  enemyGroup.add(enemyBody);
 
-  // ========== PEERJS INIT ==========
-  function initPeer() {
-    peer = new Peer({
-      debug: 2,
-      config: {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      }
-    });
+  // Glow aura
+  const enemyGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 8, 8),
+    new THREE.MeshBasicMaterial({
+      color: 0xff0000,
+      transparent: true,
+      opacity: 0.1,
+    })
+  );
+  enemyGroup.add(enemyGlow);
 
-    peer.on('open', (id) => {
-      peerId = id;
-      console.log('Peer ID:', id);
-      // Auto-create a room if none exists
-      if (!roomId) {
-        // Just show the ID — user clicks Create Room
-      }
-      updateConnectionStatus('🟢 Ready');
-    });
+  const enemyLight = new THREE.PointLight(0xff0000, 0.8, 4);
+  enemyLight.position.y = 0.5;
+  enemyGroup.add(enemyLight);
 
-    peer.on('connection', (incoming) => {
-      // Someone is connecting to us
-      if (conn) {
-        incoming.close();
-        showToast('❌ Already in a game');
-        return;
-      }
-      conn = incoming;
-      setupConnection();
-      isHost = true;
-      playerSymbol = 'X';
-      opponentSymbol = 'O';
-      gameActive = true;
-      gameOver = false;
-      myTurn = true;
-      currentPlayer = 'X';
-      board = Array(9).fill(null);
-      renderBoard();
-      updatePlayers();
-      updateStatus();
-      showToast('🎉 Opponent joined! You are X');
-      updateConnectionStatus('🟢 Connected');
-      sendState();
-    });
+  enemyGroup.position.set(2, 0.5, 2);
+  scene.add(enemyGroup);
 
-    peer.on('error', (err) => {
-      console.log('Peer error:', err);
-      if (err.type === 'peer-unavailable') {
-        showToast('❌ Room not found. Check the code.');
-      }
-    });
+  let enemyTarget = new THREE.Vector3(0, 0.5, 0);
+  let enemyTimer = 0;
 
-    // Auto-generate a peer ID for room code
-    // We'll use the peer ID as the room code
+  // ---------- PLAYER CONTROLS ----------
+  const velocity = new THREE.Vector3();
+  const direction = new THREE.Vector3();
+  const playerHeight = 1.7;
+  let isLocked = false;
+  let pitch = 0;
+  let yaw = 0;
+
+  const keysPressed = {
+    w: false, a: false, s: false, d: false
+  };
+
+  // Pointer lock
+  document.addEventListener('click', () => {
+    if (!isLocked && !gameOver) {
+      renderer.domElement.requestPointerLock();
+    }
+  });
+
+  document.addEventListener('pointerlockchange', () => {
+    isLocked = document.pointerLockElement === renderer.domElement;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isLocked) return;
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+    pitch = Math.max(-0.8, Math.min(0.8, pitch));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key in keysPressed) {
+      keysPressed[e.key] = true;
+      e.preventDefault();
+    }
+    if (e.key === 'r' && gameOver) {
+      location.reload();
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.key in keysPressed) {
+      keysPressed[e.key] = false;
+      e.preventDefault();
+    }
+  });
+
+  // ---------- COLLISION DETECTION ----------
+  function isWallAt(x, z) {
+    const margin = 0.25;
+    const col = Math.round(x - offset);
+    const row = Math.round(z - offset);
+    if (row < 0 || row >= mazeLayout.length || col < 0 || col >= mazeLayout[0].length) {
+      return true;
+    }
+    if (mazeLayout[row] && mazeLayout[row][col] === 1) {
+      return true;
+    }
+    return false;
   }
 
-  function setupConnection() {
-    conn.on('open', () => {
-      console.log('Connection open');
-      updateConnectionStatus('🟢 Connected');
-      if (!isHost) {
-        // We joined — request state
-        sendMessage({ type: 'sync_request' });
-      }
-    });
-
-    conn.on('data', (data) => {
-      handleMessage(data);
-    });
-
-    conn.on('close', () => {
-      showToast('🔌 Opponent disconnected');
-      updateConnectionStatus('🔴 Disconnected');
-      gameActive = false;
-      conn = null;
-      statusEl.innerHTML = '💔 Opponent left. Create a new room.';
-    });
-  }
-
-  // ========== CREATE / JOIN ==========
-  function createRoom() {
-    if (!peer) {
-      showToast('⏳ Connecting... wait a second');
-      return;
-    }
-    if (conn) {
-      showToast('Already in a game. Leave first.');
-      return;
-    }
-    roomId = peerId;
-    roomCodeEl.textContent = roomId;
-    isHost = true;
-    playerSymbol = 'X';
-    opponentSymbol = 'O';
-    gameActive = false;
-    gameOver = false;
-    myTurn = false;
-    board = Array(9).fill(null);
-    renderBoard();
-    updatePlayers();
-    statusEl.innerHTML = '⏳ Waiting for opponent to join...';
-    updateConnectionStatus('🟡 Waiting for player...');
-    showToast('🆕 Room created! Share the code.');
-  }
-
-  function joinRoom() {
-    const code = joinInput.value.trim();
-    if (!code) {
-      showToast('Please enter a room code');
-      return;
-    }
-    if (!peer) {
-      showToast('⏳ Still connecting... try again in 2s');
-      return;
-    }
-    if (conn) {
-      showToast('Already in a game. Leave first.');
-      return;
-    }
-
-    roomId = code;
-    roomCodeEl.textContent = roomId;
-    isHost = false;
-    playerSymbol = 'O';
-    opponentSymbol = 'X';
-    gameActive = false;
-    gameOver = false;
-    myTurn = false;
-
-    // Connect to the host
-    conn = peer.connect(code, { reliable: true });
-    setupConnection();
-
-    updateConnectionStatus('🟡 Connecting...');
-    statusEl.innerHTML = '⏳ Connecting to ' + code + '...';
-  }
-
-  function joinRoomWithCode(code) {
-    joinInput.value = code;
-    joinRoom();
-  }
-
-  function copyRoomCode() {
-    if (!roomId) {
-      showToast('Create a room first');
-      return;
-    }
-    navigator.clipboard.writeText(roomId).then(() => {
-      showToast('✅ Room code copied!');
-    }).catch(() => {
-      // Fallback
-      const input = document.createElement('input');
-      input.value = roomId;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      input.remove();
-      showToast('✅ Copied!');
-    });
-  }
-
-  function leaveGame() {
-    if (conn) {
-      conn.close();
-      conn = null;
-    }
-    roomId = null;
-    roomCodeEl.textContent = '—';
-    gameActive = false;
-    gameOver = false;
-    board = Array(9).fill(null);
-    renderBoard();
-    updatePlayers();
-    statusEl.innerHTML = '🎯 Create or join a room to start';
-    updateConnectionStatus('🔴 Not connected');
-    showToast('🚪 Left the game');
-  }
-
-  // ========== MESSAGING ==========
-  function sendMessage(msg) {
-    if (conn && conn.open) {
-      conn.send(msg);
-    }
-  }
-
-  function sendState() {
-    sendMessage({
-      type: 'state',
-      board: board,
-      currentPlayer: currentPlayer,
-      gameActive: gameActive,
-      gameOver: gameOver,
-      playerSymbol: playerSymbol // our symbol
-    });
-  }
-
-  function handleMessage(data) {
-    switch (data.type) {
-      case 'sync_request':
-        // Send our state to the joiner
-        sendState();
-        break;
-
-      case 'state':
-        // Receive full state
-        board = data.board;
-        currentPlayer = data.currentPlayer;
-        gameActive = data.gameActive;
-        gameOver = data.gameOver;
-        // Determine our turn
-        myTurn = (currentPlayer === playerSymbol);
-        renderBoard();
-        updateStatus();
-        updatePlayers();
-        // Check win state
-        const win = checkWin(board);
-        if (win && gameOver) {
-          highlightWin(win);
-          const winner = board[win[0]];
-          if (winner === playerSymbol) {
-            statusEl.innerHTML = '🏆 You win! 🎉';
-          } else if (winner) {
-            statusEl.innerHTML = '😅 Opponent wins!';
-          } else {
-            statusEl.innerHTML = '🤝 It\'s a tie!';
-          }
-        } else if (gameOver) {
-          statusEl.innerHTML = '🤝 Game over';
-        } else if (gameActive) {
-          updateStatus();
-        }
-        showToast('📥 Game state synced');
-        break;
-
-      case 'move':
-        if (!gameActive || gameOver) break;
-        const idx = data.index;
-        const symbol = data.symbol;
-        if (symbol === playerSymbol) break; // ignore our own moves (echo)
-        if (board[idx] !== null) break;
-        board[idx] = symbol;
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        myTurn = (currentPlayer === playerSymbol);
-        renderBoard();
-        const winResult = checkWin(board);
-        if (winResult) {
-          gameOver = true;
-          gameActive = false;
-          highlightWin(winResult);
-          const winner = board[winResult[0]];
-          if (winner === playerSymbol) {
-            statusEl.innerHTML = '🏆 You win! 🎉';
-          } else if (winner) {
-            statusEl.innerHTML = '😅 Opponent wins!';
-          }
-        } else if (board.every(c => c !== null)) {
-          gameOver = true;
-          gameActive = false;
-          statusEl.innerHTML = '🤝 It\'s a tie!';
-        } else {
-          updateStatus();
-        }
-        break;
-
-      case 'reset':
-        board = Array(9).fill(null);
-        gameOver = false;
-        gameActive = true;
-        currentPlayer = 'X';
-        myTurn = (playerSymbol === 'X');
-        renderBoard();
-        cells.forEach(c => c.classList.remove('win'));
-        updateStatus();
-        showToast('🔄 Game reset');
-        break;
-
-      case 'leave':
-        showToast('🔌 Opponent left the game');
-        conn = null;
-        gameActive = false;
-        statusEl.innerHTML = '💔 Opponent left. Create a new room.';
-        updateConnectionStatus('🔴 Disconnected');
-        break;
-    }
-  }
-
-  // ========== GAME LOGIC ==========
-  function handleCellClick(index) {
-    if (!gameActive || gameOver) {
-      showToast('⏳ Game not active');
-      return;
-    }
-    if (!myTurn) {
-      showToast('⏳ Waiting for opponent...');
-      return;
-    }
-    if (board[index] !== null) {
-      showToast('❌ Cell taken');
-      return;
-    }
-
-    // Make move
-    board[index] = playerSymbol;
-    renderBoard();
-
-    // Check win
-    const win = checkWin(board);
-    if (win) {
-      gameOver = true;
-      gameActive = false;
-      highlightWin(win);
-      statusEl.innerHTML = '🏆 You win! 🎉';
-      sendMessage({ type: 'move', index: index, symbol: playerSymbol });
-      return;
-    }
-
-    // Check tie
-    if (board.every(c => c !== null)) {
-      gameOver = true;
-      gameActive = false;
-      statusEl.innerHTML = '🤝 It\'s a tie!';
-      sendMessage({ type: 'move', index: index, symbol: playerSymbol });
-      return;
-    }
-
-    // Switch turn
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-    myTurn = (currentPlayer === playerSymbol);
-    updateStatus();
-
-    // Send move
-    sendMessage({ type: 'move', index: index, symbol: playerSymbol });
-  }
-
-  function checkWin(board) {
-    const lines = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
+  function canMoveTo(x, z) {
+    const radius = 0.3;
+    // Check multiple points around the player
+    const points = [
+      [x, z],
+      [x - radius, z],
+      [x + radius, z],
+      [x, z - radius],
+      [x, z + radius],
+      [x - radius * 0.7, z - radius * 0.7],
+      [x + radius * 0.7, z - radius * 0.7],
+      [x - radius * 0.7, z + radius * 0.7],
+      [x + radius * 0.7, z + radius * 0.7],
     ];
-    for (let line of lines) {
-      const [a,b,c] = line;
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        return line;
+    for (let p of points) {
+      if (isWallAt(p[0], p[1])) return false;
+    }
+    return true;
+  }
+
+  // ---------- KEY COLLECTION ----------
+  function checkKeyCollection() {
+    const pos = camera.position;
+    for (let key of keys) {
+      if (key.userData.collected) continue;
+      const dx = pos.x - key.position.x;
+      const dz = pos.z - key.position.z;
+      if (Math.sqrt(dx*dx + dz*dz) < 0.6) {
+        key.userData.collected = true;
+        key.visible = false;
+        keysCollected++;
+        document.getElementById('keyCount').textContent = keysCollected;
+        updateDoorStatus();
+        showToast('🔑 Key found! ' + (3 - keysCollected) + ' remaining');
+        if (keysCollected === 3) {
+          doorUnlocked = true;
+          document.getElementById('door-status').style.color = '#66ff66';
+          document.getElementById('door-status').textContent = '🚪 Unlocked!';
+          showToast('🚪 All keys found! Escape through the exit!');
+          // Change door color
+          door.material.color.setHex(0x2a6a2a);
+          door.material.emissive.setHex(0x00ff00);
+          door.material.emissiveIntensity = 0.2;
+        }
       }
     }
-    return null;
   }
 
-  function highlightWin(line) {
-    if (!line) return;
-    line.forEach(idx => cells[idx].classList.add('win'));
-  }
-
-  function resetGame() {
-    if (!conn || !conn.open) {
-      showToast('Not connected to anyone');
-      return;
+  function updateDoorStatus() {
+    const el = document.getElementById('door-status');
+    if (keysCollected === 3) {
+      el.style.color = '#66ff66';
+      el.textContent = '🚪 Unlocked!';
+    } else {
+      el.style.color = '#ff4444';
+      el.textContent = '🚪 Locked (' + (3 - keysCollected) + ' keys)';
     }
-    board = Array(9).fill(null);
-    gameOver = false;
-    gameActive = true;
-    currentPlayer = 'X';
-    myTurn = (playerSymbol === 'X');
-    cells.forEach(c => c.classList.remove('win'));
-    renderBoard();
-    updateStatus();
-    sendMessage({ type: 'reset' });
   }
 
-  // ========== RENDER ==========
-  function renderBoard() {
-    cells.forEach((cell, idx) => {
-      const val = board[idx];
-      cell.textContent = val || '';
-      cell.className = 'cell';
-      if (val) {
-        cell.classList.add('taken', val === 'X' ? 'x' : 'o');
+  // ---------- EXIT CHECK ----------
+  function checkExit() {
+    if (!doorUnlocked) return;
+    const pos = camera.position;
+    const dx = pos.x - 3.5;
+    const dz = pos.z - (-3.5);
+    if (Math.sqrt(dx*dx + dz*dz) < 0.8) {
+      // WIN!
+      gameOver = true;
+      document.getElementById('win-screen').style.display = 'flex';
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
       }
-    });
-  }
-
-  function updateStatus() {
-    if (!roomId) {
-      statusEl.innerHTML = '🎯 Create or join a room to start';
-      return;
-    }
-    if (!conn || !conn.open) {
-      statusEl.innerHTML = '⏳ Waiting for opponent...';
-      return;
-    }
-    if (gameOver) {
-      return;
-    }
-    if (!gameActive) {
-      statusEl.innerHTML = '⏳ Waiting for game to start...';
-      return;
-    }
-    if (myTurn) {
-      statusEl.innerHTML = '🎯 Your turn (' + playerSymbol + ')';
-    } else {
-      statusEl.innerHTML = '⏳ Waiting for opponent...';
     }
   }
 
-  function updatePlayers() {
-    if (playerSymbol === 'X') {
-      playerXEl.innerHTML = '❌ You (X)';
-      playerOEl.innerHTML = '⭕ ' + (conn && conn.open ? 'Opponent (O)' : 'Waiting...');
-      playerOEl.className = (conn && conn.open) ? 'opponent' : 'waiting';
-    } else {
-      playerXEl.innerHTML = '❌ ' + (conn && conn.open ? 'Opponent (X)' : 'Waiting...');
-      playerXEl.className = (conn && conn.open) ? 'opponent' : 'waiting';
-      playerOEl.innerHTML = '⭕ You (O)';
-      playerOEl.className = 'you';
+  // ---------- ENEMY AI ----------
+  function updateEnemy(delta) {
+    enemyTimer += delta;
+
+    // Patrol between a few points
+    const points = [
+      [2, 2],
+      [-2, 3],
+      [-3, -2],
+      [1, -3],
+      [3, -1]
+    ];
+
+    const idx = Math.floor(enemyTimer / 3) % points.length;
+    const nextIdx = (idx + 1) % points.length;
+    const t = (enemyTimer % 3) / 3;
+
+    const start = points[idx];
+    const end = points[nextIdx];
+
+    const x = start[0] + (end[0] - start[0]) * t;
+    const z = start[1] + (end[1] - start[1]) * t;
+
+    enemyGroup.position.x = x;
+    enemyGroup.position.z = z;
+
+    // Bob
+    enemyGroup.position.y = 0.5 + Math.sin(enemyTimer * 2) * 0.1;
+
+    // Face player slightly
+    const dx = camera.position.x - x;
+    const dz = camera.position.z - z;
+    enemyGroup.rotation.y = Math.atan2(dx, dz);
+
+    // Check if enemy is near player
+    const dist = Math.sqrt(dx*dx + dz*dz);
+    if (dist < 0.8 && keysCollected < 3) {
+      // GAME OVER — caught!
+      gameOver = true;
+      document.getElementById('lose-screen').style.display = 'flex';
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
+      }
     }
+
+    // Pulse enemy glow
+    enemyGlow.material.opacity = 0.1 + Math.sin(enemyTimer * 4) * 0.05;
+    enemyBody.material.emissiveIntensity = 0.3 + Math.sin(enemyTimer * 3) * 0.2;
   }
 
-  function updateConnectionStatus(text) {
-    connectionStatusEl.textContent = text;
-    connectionStatusEl.className = 'connection-status';
-    if (text.includes('Connected')) {
-      connectionStatusEl.classList.add('connected');
-    }
-  }
-
-  // ========== TOAST ==========
+  // ---------- TOAST ----------
   function showToast(msg) {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    const el = document.createElement('div');
+    el.style.cssText = `
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); color: #fff; padding: 14px 28px;
+      border-radius: 12px; font-size: 18px; z-index: 50;
+      border-left: 4px solid #ffcc00;
+      backdrop-filter: blur(4px);
+      animation: fadeUp 0.3s ease;
+      font-weight: bold;
+    `;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
   }
 
-  // ========== CELL CLICKS ==========
-  cells.forEach((cell, idx) => {
-    cell.addEventListener('click', () => handleCellClick(idx));
-  });
+  // ---------- LIGHT FLICKER ----------
+  let flickerTimer = 0;
 
-  // Enter key on join input
-  joinInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') joinRoom();
-  });
-
-  // ========== INIT ==========
-  initPeer();
-
-  // Show a help message after a moment
-  setTimeout(() => {
-    if (!roomId) {
-      statusEl.innerHTML = '🎯 Click <span class="highlight">Create Room</span> or enter a code to join';
+  function updateFlicker(delta) {
+    flickerTimer += delta;
+    if (flickerTimer > 0.05) {
+      flickerTimer = 0;
+      const intensity = 0.6 + Math.random() * 0.3;
+      mainLight.intensity = intensity;
+      mainLight.color.setHSL(0.08, 0.8, 0.4 + Math.random() * 0.2);
     }
-  }, 1000);
-
-  // Auto-join from URL param ?room=CODE
-  const params = new URLSearchParams(window.location.search);
-  const roomParam = params.get('room');
-  if (roomParam) {
-    setTimeout(() => {
-      joinInput.value = roomParam;
-      joinRoom();
-    }, 1500);
   }
 
-  console.log('🎮 Tic-Tac-Toe Multiplayer');
-  console.log('Share your room code with a friend!');
-</script>
+  // ---------- GAME LOOP ----------
+  const clock = new THREE.Clock();
 
+  function animate() {
+    requestAnimationFrame(animate);
+
+    const delta = Math.min(clock.getDelta(), 0.05);
+
+    if (!gameOver && isLocked) {
+      // Player movement
+      const speed = 3.0 * delta;
+      const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+      const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+
+      let moveX = 0, moveZ = 0;
+      if (keysPressed.w) { moveX += forward.x; moveZ += forward.z; }
+      if (keysPressed.s) { moveX -= forward.x; moveZ -= forward.z; }
+      if (keysPressed.a) { moveX -= right.x; moveZ -= right.z; }
+      if (keysPressed.d) { moveX += right.x; moveZ += right.z; }
+
+      if (moveX !== 0 || moveZ !== 0) {
+        const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
+        moveX /= len;
+        moveZ /= len;
+
+        const newX = camera.position.x + moveX * speed;
+        const newZ = camera.position.z + moveZ * speed;
+
+        // Check collision separately for X and Z (slide along walls)
+        if (canMoveTo(newX, camera.position.z)) {
+          camera.position.x = newX;
+        }
+        if (canMoveTo(camera.position.x, newZ)) {
+          camera.position.z = newZ;
+        }
+      }
+
+      // Update camera rotation
+      camera.rotation.order = 'YXZ';
+      camera.rotation.y = yaw;
+      camera.rotation.x = pitch;
+
+      // Check key collection
+      checkKeyCollection();
+
+      // Check exit
+      checkExit();
+
+      // Update enemy
+      updateEnemy(delta);
+
+      // Update flicker
+      updateFlicker(delta);
+
+      // Update UI
+      document.getElementById('keyCount').textContent = keysCollected;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  // ---------- RESIZE ----------
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- START ----------
+  animate();
+
+  // Initial door status
+  updateDoorStatus();
+
+  console.log('👻 The Dark Maze — Find 3 keys and escape!');
+  console.log('WASD to move · Mouse to look · Click to lock mouse');
+
+  // Prevent context menu
+  document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
 </body>
 </html>
