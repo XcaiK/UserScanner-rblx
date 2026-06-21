@@ -6,7 +6,7 @@
   <title>🤡 Prank Link Generator</title>
   <style>
     * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-    body { max-width: 700px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+    body { max-width: 750px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
     .card { background: #16213e; padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #0f3460; }
     h1 { color: #e94560; margin-top: 0; }
     label { display: block; margin: 12px 0 4px; font-weight: bold; color: #aaa; }
@@ -14,15 +14,24 @@
     input::placeholder { color: #888; }
     button { background: #e94560; color: #fff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 14px; transition: 0.2s; }
     button:hover { background: #c73652; transform: scale(1.02); }
-    .output { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 12px; word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    button.secondary { background: #0f3460; }
+    button.secondary:hover { background: #1a4a7a; }
+    .output { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 12px; word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .output a { color: #e94560; text-decoration: none; }
     .output button { margin: 0; padding: 8px 16px; font-size: 13px; background: #1a1a2e; }
     .badge { display: inline-block; background: #e94560; color: #fff; font-size: 12px; padding: 2px 12px; border-radius: 20px; margin-left: 8px; }
     .warning { background: #2d1b1b; border-left: 4px solid #e94560; padding: 12px; border-radius: 6px; margin: 16px 0; color: #ff9999; }
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .row > * { flex: 1; min-width: 150px; }
-    .emoji-big { font-size: 48px; text-align: center; margin: 10px 0; }
     .footer { text-align: center; color: #555; font-size: 13px; margin-top: 30px; }
+    .fake-email-box { background: #0a0a1a; padding: 16px; border-radius: 8px; border: 1px dashed #e94560; margin-top: 10px; }
+    .fake-email-box .label { color: #e94560; font-weight: bold; }
+    .code-display { background: #1a1a2e; padding: 10px 20px; border-radius: 6px; font-family: monospace; font-size: 28px; letter-spacing: 8px; display: inline-block; color: #0f0; margin: 10px 0; }
+    .hidden { display: none; }
+    .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab-bar button { margin: 0; padding: 10px 20px; background: #0f3460; flex: 1; min-width: 100px; }
+    .tab-bar button.active { background: #e94560; }
+    .prank-preview { background: #0a0a1a; padding: 20px; border-radius: 8px; text-align: center; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -31,63 +40,137 @@
   <h1>🤡 Prank Link Generator</h1>
   <div class="warning">⚠️ This tool creates joke links. Only use with friends who know it's a prank.</div>
 
-  <label>🔗 Base URL</label>
-  <input id="base" value="https://example.com" placeholder="e.g., https://yoursite.com">
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="active" onclick="switchTab('basic', this)">🔗 Basic</button>
+    <button onclick="switchTab('verify', this)">📧 Verification Prank</button>
+    <button onclick="switchTab('advanced', this)">⚙️ Advanced</button>
+  </div>
 
-  <label>📝 Parameters (one per line)</label>
-  <textarea id="params" rows="2" placeholder="id=123&#10;ref=home">id=123
+  <!-- TAB 1: BASIC -->
+  <div id="tab-basic">
+    <label>🔗 Base URL</label>
+    <input id="base" value="https://example.com" placeholder="e.g., https://yoursite.com">
+
+    <label>📝 Parameters (one per line)</label>
+    <textarea id="params" rows="2" placeholder="id=123&#10;ref=home">id=123
 ref=home</textarea>
 
-  <label>🎭 Prank Type</label>
-  <select id="prankType">
-    <option value="rickroll">🎵 Rickroll (Never Gonna Give You Up)</option>
-    <option value="trololo">🎶 Trololo Song</option>
-    <option value="scary">👻 Scary Maze (jumpscare)</option>
-    <option value="nathan">📺 "That's a lot of damage!"</option>
-    <option value="random">🎲 Random meme from list</option>
-  </select>
+    <label>🎭 Prank Type</label>
+    <select id="prankType">
+      <option value="rickroll">🎵 Rickroll (Never Gonna Give You Up)</option>
+      <option value="trololo">🎶 Trololo Song</option>
+      <option value="scary">👻 Scary Maze (jumpscare)</option>
+      <option value="nathan">📺 "That's a lot of damage!"</option>
+      <option value="random">🎲 Random meme from list</option>
+    </select>
+  </div>
 
-  <label>📱 Add to Home Screen?</label>
-  <select id="addHome">
-    <option value="yes">✅ Yes — prompt to add to home screen first</option>
-    <option value="no">❌ No — just redirect</option>
-  </select>
+  <!-- TAB 2: VERIFICATION PRANK -->
+  <div id="tab-verify" class="hidden">
+    <label>🏢 Fake Company/Brand Name</label>
+    <input id="brandName" value="SecureVerify" placeholder="e.g., Bank of America, Amazon, etc.">
 
-  <label>⏳ Delay before redirect (seconds)</label>
-  <input id="delay" type="number" value="2" min="0" max="10">
+    <label>📧 Fake Email to "Send" Code To</label>
+    <input id="fakeEmail" value="user@example.com" placeholder="victim@email.com">
 
-  <button onclick="generatePrankLink()">⚡ Generate Prank Link</button>
+    <label>🔢 Fake Verification Code (leave blank for random)</label>
+    <input id="fakeCode" placeholder="e.g., 482910 (or leave blank)">
+
+    <label>💬 Custom "Verification Failed" Messages (one per line)</label>
+    <textarea id="failMessages" rows="3">⚠️ Invalid code. Try again.
+🚫 Security alert: Code mismatch.
+⏳ Code expired. Request a new one.
+🔒 Too many attempts. Account locked? Just kidding 😉</textarea>
+
+    <div class="fake-email-box">
+      <div class="label">📨 Simulated Email Preview</div>
+      <div style="background:#0f3460; padding:12px; border-radius:6px; margin-top:8px; font-size:14px; color:#aaa;">
+        <strong>From:</strong> noreply@<span id="brandPreview">SecureVerify</span>.com<br>
+        <strong>Subject:</strong> Your verification code<br>
+        <strong>Message:</strong> Your code is: <span id="codePreview" class="code-display" style="font-size:20px; letter-spacing:4px;">------</span>
+      </div>
+      <button onclick="generateFakeCode()" class="secondary" style="margin-top:10px;">🔄 Generate New Fake Code</button>
+    </div>
+  </div>
+
+  <!-- TAB 3: ADVANCED -->
+  <div id="tab-advanced" class="hidden">
+    <label>📱 Add to Home Screen?</label>
+    <select id="addHome">
+      <option value="yes">✅ Yes — prompt to add to home screen first</option>
+      <option value="no">❌ No — just redirect</option>
+    </select>
+
+    <label>⏳ Delay before redirect (seconds)</label>
+    <input id="delay" type="number" value="2" min="0" max="10">
+
+    <label>🎨 Custom Page Title</label>
+    <input id="pageTitle" value="Verifying..." placeholder="e.g., Please wait...">
+
+    <label>🖼️ Custom Loading Message</label>
+    <input id="loadingMsg" value="Loading... 🎭" placeholder="e.g., Verifying your identity...">
+  </div>
+
+  <button onclick="generatePrankLink()" style="width:100%;">⚡ Generate Prank Link</button>
 </div>
 
+<!-- RESULT CARD -->
 <div class="card" id="resultCard" style="display:none;">
   <h3>✅ Your Prank Link</h3>
   <div class="output" id="output">
     <span id="linkDisplay">Loading...</span>
     <button onclick="copyLink()">📋 Copy</button>
   </div>
-  <div style="margin-top:12px;">
-    <button onclick="previewPrank()" style="background:#0f3460;">👀 Preview (opens in new tab)</button>
-    <button onclick="generateQR()" style="background:#0f3460;">📱 QR Code</button>
+  <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+    <button onclick="previewPrank()" class="secondary">👀 Preview (new tab)</button>
+    <button onclick="generateQR()" class="secondary">📱 QR Code</button>
+    <button onclick="testEmailSimulation()" class="secondary">📧 Test Email Flow</button>
   </div>
   <div id="qrArea" style="margin-top:12px; text-align:center;"></div>
 </div>
 
+<!-- STATS CARD -->
 <div class="card">
   <h3>📊 Stats & Extra</h3>
   <div class="row">
     <div><label>Total links generated:</label> <span id="counter">0</span></div>
     <div><label>Last generated:</label> <span id="lastTime">—</span></div>
   </div>
-  <button onclick="clearAll()" style="background:#333;">🗑️ Reset counter</button>
-  <button onclick="generateRandomQuote()" style="background:#333;">💬 Random joke quote</button>
+  <button onclick="clearAll()" class="secondary">🗑️ Reset counter</button>
+  <button onclick="generateRandomQuote()" class="secondary">💬 Random joke quote</button>
   <div id="quoteDisplay" style="margin-top:10px; color:#aaa; font-style:italic;"></div>
 </div>
 
-<div class="footer">⚠️ For entertainment only. Don't be a jerk — tell your friends it's a prank.</div>
+<div class="footer">⚠️ For entertainment only. No actual emails are sent. Tell your friends it's a prank.</div>
 
 <script>
   let counter = parseInt(localStorage.getItem('prankCounter')) || 0;
   let lastLink = '';
+  let currentFakeCode = '';
+
+  // Tab switching
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#tab-basic, #tab-verify, #tab-advanced').forEach(el => el.classList.add('hidden'));
+    document.getElementById('tab-' + tab).classList.remove('hidden');
+  }
+
+  // Generate fake code
+  function generateFakeCode() {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    currentFakeCode = code;
+    document.getElementById('codePreview').textContent = code;
+    const brand = document.getElementById('brandName').value || 'SecureVerify';
+    document.getElementById('brandPreview').textContent = brand;
+  }
+  generateFakeCode();
+
+  // Update brand preview on input
+  document.getElementById('brandName').addEventListener('input', function() {
+    document.getElementById('brandPreview').textContent = this.value || 'SecureVerify';
+  });
 
   function getPrankURL(type) {
     const map = {
@@ -106,6 +189,17 @@ ref=home</textarea>
     const prank = document.getElementById('prankType').value;
     const addHome = document.getElementById('addHome').value;
     const delay = document.getElementById('delay').value || 2;
+    const pageTitle = document.getElementById('pageTitle').value || 'Verifying...';
+    const loadingMsg = document.getElementById('loadingMsg').value || 'Loading... 🎭';
+
+    // Verification settings
+    const brand = document.getElementById('brandName').value || 'SecureVerify';
+    const fakeEmail = document.getElementById('fakeEmail').value || 'user@example.com';
+    let fakeCode = document.getElementById('fakeCode').value.trim();
+    if (!fakeCode) {
+      fakeCode = Math.floor(100000 + Math.random() * 900000).toString();
+    }
+    const failMessages = document.getElementById('failMessages').value.split('\n').filter(m => m.trim());
 
     const params = paramsRaw.split('\n').filter(p => p.trim());
     let url = base;
@@ -113,33 +207,109 @@ ref=home</textarea>
 
     const prankURL = getPrankURL(prank);
 
-    // Build the final prank HTML page (self-contained)
+    // Build the prank HTML with verification step
     const prankHTML = `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width">
 ${addHome === 'yes' ? '<meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="data:application/json,{}">' : ''}
-<title>Loading...</title>
-<style>body{background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;font-size:24px;}</style>
+<title>${pageTitle}</title>
+<style>
+* { box-sizing:border-box; font-family:system-ui,sans-serif; }
+body { background:#0a0a1a; color:#eee; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; padding:20px; }
+.card { background:#16213e; padding:40px; border-radius:16px; max-width:450px; width:100%; text-align:center; border:1px solid #0f3460; }
+input { width:100%; padding:14px; font-size:24px; letter-spacing:8px; text-align:center; background:#0f3460; border:none; border-radius:8px; color:#fff; margin:10px 0; }
+input:focus { outline:2px solid #e94560; }
+button { background:#e94560; color:#fff; border:none; padding:14px; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; width:100%; margin-top:10px; }
+button:hover { background:#c73652; }
+.error { color:#ff6666; font-size:14px; margin-top:8px; min-height:24px; }
+.hint { color:#666; font-size:13px; margin-top:8px; }
+.brand { color:#e94560; font-weight:bold; }
+.code-display { font-family:monospace; font-size:32px; letter-spacing:6px; background:#0a0a1a; padding:10px; border-radius:6px; display:inline-block; }
+.email-sent { color:#66ff66; font-size:14px; margin:8px 0; }
+</style>
 </head>
 <body>
-<div>Loading... 🎭</div>
+<div class="card" id="app">
+  <div style="font-size:48px;margin-bottom:10px;">📧</div>
+  <h2 style="color:#e94560;">${brand}</h2>
+  <p style="color:#aaa;">We sent a verification code to</p>
+  <p style="color:#fff;font-weight:bold;">${fakeEmail}</p>
+  <div class="email-sent" id="emailStatus">📨 Code sent: <span class="code-display">${fakeCode}</span></div>
+  <p style="color:#666;font-size:13px;">Enter the code to continue</p>
+  <input id="codeInput" type="text" maxlength="6" placeholder="------" autofocus>
+  <button id="verifyBtn">✅ Verify</button>
+  <div class="error" id="errorMsg"></div>
+  <div class="hint">💡 Hint: check the "email" above 😉</div>
+</div>
 <script>
-${addHome === 'yes' ? `
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  deferredPrompt.prompt();
-});
-` : ''}
-setTimeout(() => {
-  window.location.href = '${prankURL}';
-}, ${delay * 1000});
+  const correctCode = '${fakeCode}';
+  const failMessages = ${JSON.stringify(failMessages)};
+  let attempts = 0;
+  const input = document.getElementById('codeInput');
+  const error = document.getElementById('errorMsg');
+  const verifyBtn = document.getElementById('verifyBtn');
+
+  // Auto-focus and auto-submit on 6 digits
+  input.addEventListener('input', function() {
+    this.value = this.value.replace(/\\D/g, '').slice(0,6);
+    if (this.value.length === 6) verifyCode();
+  });
+
+  verifyBtn.addEventListener('click', verifyCode);
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') verifyCode();
+  });
+
+  function verifyCode() {
+    const val = input.value.trim();
+    if (!val) {
+      error.textContent = 'Please enter the code.';
+      return;
+    }
+    if (val === correctCode) {
+      error.style.color = '#66ff66';
+      error.textContent = '✅ Verified! Redirecting...';
+      verifyBtn.disabled = true;
+      // Show the actual prank URL before redirect? Nah, just go.
+      setTimeout(() => {
+        window.location.href = '${prankURL}';
+      }, 1500);
+    } else {
+      attempts++;
+      const msg = failMessages.length > 0 
+        ? failMessages[attempts % failMessages.length] 
+        : '❌ Invalid code. Try again.';
+      error.style.color = '#ff6666';
+      error.textContent = msg + ' (attempt ' + attempts + ')';
+      input.value = '';
+      input.focus();
+      // If too many attempts, add extra spice
+      if (attempts >= 5) {
+        error.textContent = '🔒 ' + (failMessages[0] || 'Too many attempts. But this is a prank, so...') + ' 😂';
+        setTimeout(() => {
+          window.location.href = '${prankURL}';
+        }, 2000);
+      }
+    }
+  }
+
+  // Also allow clicking the code display to auto-fill (for the prankster)
+  document.querySelector('.code-display')?.addEventListener('click', function() {
+    input.value = this.textContent;
+    verifyCode();
+  });
+
+  // Countdown to auto-redirect if they're too slow (optional — 30s)
+  setTimeout(() => {
+    if (!document.querySelector('#verifyBtn[disabled]')) {
+      window.location.href = '${prankURL}';
+    }
+  }, 30000);
 <\/script>
 </body>
 </html>`;
 
-    // Encode as data URI
     const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(prankHTML);
     lastLink = encoded;
 
@@ -151,7 +321,6 @@ setTimeout(() => {
     document.getElementById('counter').textContent = counter;
     document.getElementById('lastTime').textContent = new Date().toLocaleTimeString();
 
-    // Scroll to result
     document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -162,7 +331,6 @@ setTimeout(() => {
       btn.textContent = '✅ Copied!';
       setTimeout(() => btn.textContent = orig, 2000);
     }).catch(() => {
-      // Fallback
       const area = document.createElement('textarea');
       area.value = lastLink;
       document.body.appendChild(area);
@@ -183,6 +351,10 @@ setTimeout(() => {
     area.innerHTML = `<img src="${qrURL}" style="border-radius:12px;border:2px solid #0f3460;">`;
   }
 
+  function testEmailSimulation() {
+    alert('📧 No actual email sent! This is a simulation.\n\nThe victim will see a fake "email" with the code displayed right on the page.\nThey just need to copy it from the screen.\n\nIt\'s a SOCIAL PRANK — they\'ll think they need to check their email, but the code is right there all along! 😂');
+  }
+
   function clearAll() {
     localStorage.removeItem('prankCounter');
     counter = 0;
@@ -198,12 +370,13 @@ setTimeout(() => {
       "I'm a bot, beep boop",
       "You've been tricked! 🎉",
       "Why are you still reading?",
-      "Send this to a friend 😉"
+      "Send this to a friend 😉",
+      "The code is literally on the screen 🤦",
+      "Email? What email? 😂"
     ];
     document.getElementById('quoteDisplay').textContent = quotes[Math.floor(Math.random() * quotes.length)];
   }
 
-  // Init counter
   document.getElementById('counter').textContent = counter;
 </script>
 
