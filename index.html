@@ -1,33 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Link Maker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤡 Prank Link Generator</title>
   <style>
-    body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
-    input, button { padding: 10px; width: 100%; margin: 6px 0; }
-    .output { background: #f0f0f0; padding: 12px; margin-top: 12px; word-break: break-all; }
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body { max-width: 700px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+    .card { background: #16213e; padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid #0f3460; }
+    h1 { color: #e94560; margin-top: 0; }
+    label { display: block; margin: 12px 0 4px; font-weight: bold; color: #aaa; }
+    input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #0f3460; color: #fff; font-size: 15px; }
+    input::placeholder { color: #888; }
+    button { background: #e94560; color: #fff; border: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 14px; transition: 0.2s; }
+    button:hover { background: #c73652; transform: scale(1.02); }
+    .output { background: #0f3460; padding: 14px; border-radius: 8px; margin-top: 12px; word-break: break-all; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .output a { color: #e94560; text-decoration: none; }
+    .output button { margin: 0; padding: 8px 16px; font-size: 13px; background: #1a1a2e; }
+    .badge { display: inline-block; background: #e94560; color: #fff; font-size: 12px; padding: 2px 12px; border-radius: 20px; margin-left: 8px; }
+    .warning { background: #2d1b1b; border-left: 4px solid #e94560; padding: 12px; border-radius: 6px; margin: 16px 0; color: #ff9999; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 150px; }
+    .emoji-big { font-size: 48px; text-align: center; margin: 10px 0; }
+    .footer { text-align: center; color: #555; font-size: 13px; margin-top: 30px; }
   </style>
 </head>
 <body>
-  <h2>🔗 Custom Link Maker</h2>
-  <input id="base" placeholder="Base URL (e.g., https://example.com)" value="https://example.com">
-  <input id="param1" placeholder="Parameter 1 (e.g., id=123)">
-  <input id="param2" placeholder="Parameter 2 (e.g., ref=home)">
-  <button onclick="generateLink()">Generate Link</button>
-  <div class="output" id="output">Your link will appear here</div>
 
-  <script>
-    function generateLink() {
-      const base = document.getElementById('base').value.trim();
-      const p1 = document.getElementById('param1').value.trim();
-      const p2 = document.getElementById('param2').value.trim();
-      let link = base;
-      let params = [];
-      if (p1) params.push(p1);
-      if (p2) params.push(p2);
-      if (params.length > 0) link += '?' + params.join('&');
-      document.getElementById('output').innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
-    }
-  </script>
+<div class="card">
+  <h1>🤡 Prank Link Generator</h1>
+  <div class="warning">⚠️ This tool creates joke links. Only use with friends who know it's a prank.</div>
+
+  <label>🔗 Base URL</label>
+  <input id="base" value="https://example.com" placeholder="e.g., https://yoursite.com">
+
+  <label>📝 Parameters (one per line)</label>
+  <textarea id="params" rows="2" placeholder="id=123&#10;ref=home">id=123
+ref=home</textarea>
+
+  <label>🎭 Prank Type</label>
+  <select id="prankType">
+    <option value="rickroll">🎵 Rickroll (Never Gonna Give You Up)</option>
+    <option value="trololo">🎶 Trololo Song</option>
+    <option value="scary">👻 Scary Maze (jumpscare)</option>
+    <option value="nathan">📺 "That's a lot of damage!"</option>
+    <option value="random">🎲 Random meme from list</option>
+  </select>
+
+  <label>📱 Add to Home Screen?</label>
+  <select id="addHome">
+    <option value="yes">✅ Yes — prompt to add to home screen first</option>
+    <option value="no">❌ No — just redirect</option>
+  </select>
+
+  <label>⏳ Delay before redirect (seconds)</label>
+  <input id="delay" type="number" value="2" min="0" max="10">
+
+  <button onclick="generatePrankLink()">⚡ Generate Prank Link</button>
+</div>
+
+<div class="card" id="resultCard" style="display:none;">
+  <h3>✅ Your Prank Link</h3>
+  <div class="output" id="output">
+    <span id="linkDisplay">Loading...</span>
+    <button onclick="copyLink()">📋 Copy</button>
+  </div>
+  <div style="margin-top:12px;">
+    <button onclick="previewPrank()" style="background:#0f3460;">👀 Preview (opens in new tab)</button>
+    <button onclick="generateQR()" style="background:#0f3460;">📱 QR Code</button>
+  </div>
+  <div id="qrArea" style="margin-top:12px; text-align:center;"></div>
+</div>
+
+<div class="card">
+  <h3>📊 Stats & Extra</h3>
+  <div class="row">
+    <div><label>Total links generated:</label> <span id="counter">0</span></div>
+    <div><label>Last generated:</label> <span id="lastTime">—</span></div>
+  </div>
+  <button onclick="clearAll()" style="background:#333;">🗑️ Reset counter</button>
+  <button onclick="generateRandomQuote()" style="background:#333;">💬 Random joke quote</button>
+  <div id="quoteDisplay" style="margin-top:10px; color:#aaa; font-style:italic;"></div>
+</div>
+
+<div class="footer">⚠️ For entertainment only. Don't be a jerk — tell your friends it's a prank.</div>
+
+<script>
+  let counter = parseInt(localStorage.getItem('prankCounter')) || 0;
+  let lastLink = '';
+
+  function getPrankURL(type) {
+    const map = {
+      rickroll: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      trololo: 'https://www.youtube.com/watch?v=oavMtUWDBTM',
+      scary: 'https://www.thescarymaze.com/',
+      nathan: 'https://www.youtube.com/watch?v=zBZ2K7xXy5g',
+      random: ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'https://www.youtube.com/watch?v=oavMtUWDBTM', 'https://www.youtube.com/watch?v=zBZ2K7xXy5g', 'https://www.youtube.com/watch?v=YlUKcNNmywk', 'https://www.youtube.com/watch?v=6Ejga4kJUts'][Math.floor(Math.random() * 5)]
+    };
+    return map[type] || map.rickroll;
+  }
+
+  function generatePrankLink() {
+    const base = document.getElementById('base').value.trim();
+    const paramsRaw = document.getElementById('params').value;
+    const prank = document.getElementById('prankType').value;
+    const addHome = document.getElementById('addHome').value;
+    const delay = document.getElementById('delay').value || 2;
+
+    const params = paramsRaw.split('\n').filter(p => p.trim());
+    let url = base;
+    if (params.length) url += '?' + params.map(p => encodeURIComponent(p.trim())).join('&');
+
+    const prankURL = getPrankURL(prank);
+
+    // Build the final prank HTML page (self-contained)
+    const prankHTML = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width">
+${addHome === 'yes' ? '<meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="data:application/json,{}">' : ''}
+<title>Loading...</title>
+<style>body{background:#000;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;font-size:24px;}</style>
+</head>
+<body>
+<div>Loading... 🎭</div>
+<script>
+${addHome === 'yes' ? `
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  deferredPrompt.prompt();
+});
+` : ''}
+setTimeout(() => {
+  window.location.href = '${prankURL}';
+}, ${delay * 1000});
+<\/script>
+</body>
+</html>`;
+
+    // Encode as data URI
+    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(prankHTML);
+    lastLink = encoded;
+
+    document.getElementById('linkDisplay').innerHTML = `<a href="${encoded}" target="_blank">${encoded.substring(0, 70)}...</a>`;
+    document.getElementById('resultCard').style.display = 'block';
+
+    counter++;
+    localStorage.setItem('prankCounter', counter);
+    document.getElementById('counter').textContent = counter;
+    document.getElementById('lastTime').textContent = new Date().toLocaleTimeString();
+
+    // Scroll to result
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(lastLink).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      // Fallback
+      const area = document.createElement('textarea');
+      area.value = lastLink;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+    });
+  }
+
+  function previewPrank() {
+    if (lastLink) window.open(lastLink, '_blank');
+  }
+
+  function generateQR() {
+    const area = document.getElementById('qrArea');
+    if (!lastLink) return;
+    const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastLink)}`;
+    area.innerHTML = `<img src="${qrURL}" style="border-radius:12px;border:2px solid #0f3460;">`;
+  }
+
+  function clearAll() {
+    localStorage.removeItem('prankCounter');
+    counter = 0;
+    document.getElementById('counter').textContent = '0';
+  }
+
+  function generateRandomQuote() {
+    const quotes = [
+      "It's a prank, bro!",
+      "Never gonna give you up...",
+      "This is fine 🔥",
+      "404: Sanity not found",
+      "I'm a bot, beep boop",
+      "You've been tricked! 🎉",
+      "Why are you still reading?",
+      "Send this to a friend 😉"
+    ];
+    document.getElementById('quoteDisplay').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+  }
+
+  // Init counter
+  document.getElementById('counter').textContent = counter;
+</script>
+
 </body>
 </html>
