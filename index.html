@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Corp Hub · custom browser</title>
-  <!-- Font Awesome for clean icons -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
     * {
@@ -15,52 +15,63 @@
     }
 
     body {
-      background: #0b0e14;
+      background: #000000; /* full black background */
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       padding: 20px;
-      transition: background 0.25s ease;
+      transition: background 0.3s ease;
     }
 
-    /* main browser window — corp hub */
+    /* main browser — glassmorphism on black */
     .browser {
       width: 1300px;
       max-width: 100%;
       height: 90vh;
       max-height: 820px;
-      background: #f5f7fb;
-      border-radius: 28px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      background: rgba(20, 24, 32, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 32px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
+      transition: background 0.4s ease, box-shadow 0.4s ease, transform 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      animation: floatIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* theme color variables (dynamically updated via JS) */
+    @keyframes floatIn {
+      0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* theme color vars (dynamically updated) */
     .browser {
-      --accent: #2563eb;
-      --accent-light: #3b82f6;
-      --header-bg: #eef1f5;
-      --tab-bg: #d6dde6;
-      --tab-active: white;
-      --status-bg: #eef1f5;
-      --url-border: #dce1e8;
+      --accent: #6c8cff;
+      --accent-glow: rgba(108, 140, 255, 0.25);
+      --header-bg: rgba(30, 34, 44, 0.7);
+      --tab-bg: rgba(50, 56, 70, 0.6);
+      --tab-active: rgba(22, 26, 34, 0.9);
+      --status-bg: rgba(18, 22, 30, 0.7);
+      --url-border: rgba(255, 255, 255, 0.08);
+      --text-primary: #f0f4ff;
+      --text-secondary: #b0baca;
     }
 
-    /* ----- title bar / header ----- */
+    /* ----- header ----- */
     .browser-header {
       background: var(--header-bg);
       padding: 14px 20px 12px 20px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       display: flex;
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      backdrop-filter: blur(2px);
-      transition: background 0.25s ease;
+      backdrop-filter: blur(8px);
+      transition: background 0.3s ease;
     }
 
     .window-controls {
@@ -68,18 +79,16 @@
       gap: 10px;
       align-items: center;
     }
-
     .dot {
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      display: inline-block;
-      transition: 0.15s;
+      transition: 0.2s;
     }
     .dot.red { background: #ff5f56; }
     .dot.yellow { background: #ffbd2e; }
     .dot.green { background: #27c93f; }
-    .dot:hover { transform: scale(1.2); }
+    .dot:hover { transform: scale(1.2) rotate(8deg); }
 
     .brand {
       display: flex;
@@ -87,17 +96,21 @@
       gap: 8px;
       font-weight: 600;
       font-size: 1.1rem;
-      color: #1f2937;
+      color: #f0f4ff;
       letter-spacing: -0.3px;
-      margin-left: 4px;
     }
     .brand i {
       color: var(--accent);
       font-size: 1.2rem;
-      transition: color 0.25s;
+      transition: color 0.3s, transform 0.3s;
+      animation: pulseGlow 3s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 2px var(--accent)); }
+      50% { filter: drop-shadow(0 0 12px var(--accent)); }
     }
     .brand span {
-      background: linear-gradient(145deg, #1e293b, #0f172a);
+      background: linear-gradient(145deg, #f0f4ff, #b0baca);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -107,37 +120,36 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-left: auto;
-      color: #3b4a5e;
+      color: #b0baca;
     }
     .nav-actions i {
       font-size: 1.1rem;
-      cursor: default;
-      opacity: 0.7;
-      transition: 0.15s;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: 0.2s;
     }
-    .nav-actions i:hover { opacity: 1; color: #0f172a; }
+    .nav-actions i:hover { opacity: 1; color: #fff; transform: scale(1.1); }
 
-    /* URL + action bar */
+    /* URL bar */
     .url-bar {
       display: flex;
       align-items: center;
-      background: white;
+      background: rgba(10, 12, 18, 0.7);
       border-radius: 40px;
       padding: 0 18px;
       flex: 1;
       min-width: 200px;
       height: 44px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
       border: 1px solid var(--url-border);
-      transition: 0.15s, border-color 0.25s;
+      transition: 0.25s, border-color 0.3s;
+      backdrop-filter: blur(4px);
     }
     .url-bar:focus-within {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), inset 0 1px 3px rgba(0,0,0,0.02);
+      box-shadow: 0 0 0 4px var(--accent-glow), inset 0 1px 2px rgba(0,0,0,0.4);
     }
     .url-bar i {
-      color: #6b7a8f;
+      color: #7a88a0;
       font-size: 0.9rem;
       margin-right: 12px;
     }
@@ -148,22 +160,20 @@
       font-size: 0.95rem;
       padding: 10px 0;
       outline: none;
-      color: #111827;
+      color: #f0f4ff;
       font-weight: 450;
       letter-spacing: -0.2px;
     }
-    .url-bar input::placeholder {
-      color: #9aa6b5;
-      font-weight: 400;
-    }
+    .url-bar input::placeholder { color: #6a7a90; }
     .url-bar .lock-icon {
       margin-left: auto;
-      color: #22a67b;
+      color: #4cd9a0;
       font-size: 0.8rem;
       cursor: pointer;
+      transition: 0.2s;
     }
+    .url-bar .lock-icon:hover { transform: scale(1.15); }
 
-    /* quick tools (right of url) */
     .tool-icons {
       display: flex;
       align-items: center;
@@ -171,32 +181,61 @@
       margin-left: 12px;
     }
     .tool-icons i {
-      color: #3d4e65;
+      color: #a0aec0;
       font-size: 1.1rem;
-      opacity: 0.7;
-      transition: 0.1s;
-      cursor: default;
+      opacity: 0.6;
+      transition: 0.2s;
+      cursor: pointer;
     }
-    .tool-icons i:hover { opacity: 1; color: #0b1e33; }
+    .tool-icons i:hover { opacity: 1; color: #fff; transform: scale(1.1); }
 
-    /* ----- main browser view (web content) ----- */
+    /* theme picker */
+    .theme-picker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.04);
+      padding: 2px 10px 2px 6px;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .theme-picker label {
+      font-size: 0.7rem;
+      color: #a0aec0;
+    }
+    .theme-picker input[type="color"] {
+      width: 26px;
+      height: 26px;
+      border: none;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: 0.2s;
+    }
+    .theme-picker input[type="color"]:hover { transform: scale(1.08); }
+    .theme-picker input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .theme-picker input[type="color"]::-webkit-color-swatch { border: none; border-radius: 40px; }
+
+    /* ----- browser body ----- */
     .browser-body {
       flex: 1;
-      background: #ffffff;
+      background: rgba(8, 10, 16, 0.6);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    /* tab strip — corp hub style */
+    /* tab strip */
     .tab-strip {
-      background: #e8ecf2;
+      background: rgba(16, 20, 28, 0.6);
       padding: 8px 20px 0 20px;
       display: flex;
       gap: 4px;
-      border-bottom: 1px solid #d0d7e0;
-      transition: background 0.25s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(4px);
     }
     .tab {
       background: var(--tab-bg);
@@ -204,60 +243,66 @@
       border-radius: 12px 12px 0 0;
       font-size: 0.85rem;
       font-weight: 500;
-      color: #1f2a3a;
+      color: #c0cada;
       display: flex;
       align-items: center;
       gap: 8px;
-      cursor: default;
+      cursor: pointer;
       border: 1px solid transparent;
       border-bottom: none;
-      transition: 0.15s, background 0.2s;
-      letter-spacing: -0.2px;
-      animation: tabFade 0.2s ease;
+      transition: 0.25s, background 0.3s, transform 0.15s;
+      animation: tabSlide 0.3s ease;
+      backdrop-filter: blur(2px);
     }
+    .tab:hover { background: rgba(70, 78, 98, 0.5); }
     .tab.active {
       background: var(--tab-active);
-      border-color: #d0d7e0;
-      border-bottom: 2px solid var(--tab-active);
-      color: #0b1e33;
+      border-color: rgba(255, 255, 255, 0.06);
+      border-bottom: 2px solid var(--accent);
+      color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 -2px 4px rgba(0,0,0,0.02);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    }
+    @keyframes tabSlide {
+      0% { opacity: 0; transform: translateY(-8px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
     .tab i { font-size: 0.75rem; opacity: 0.6; }
-    .tab .close-tab { margin-left: 6px; opacity: 0.4; cursor: pointer; }
-    .tab .close-tab:hover { opacity: 1; }
+    .tab .close-tab { margin-left: 6px; opacity: 0.3; cursor: pointer; transition: 0.2s; }
+    .tab .close-tab:hover { opacity: 1; transform: rotate(90deg); }
 
     .tab-add {
       background: transparent;
       border: none;
       font-size: 1.2rem;
-      color: #3b4f66;
+      color: #8090a8;
       padding: 0 12px;
-      cursor: default;
-      opacity: 0.6;
-      transition: 0.1s;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: 0.2s;
     }
-    .tab-add:hover { opacity: 1; }
+    .tab-add:hover { opacity: 1; transform: scale(1.1); color: #fff; }
 
     /* content area */
     .content-area {
       flex: 1;
-      background: #f2f5f9;
+      background: #0a0c14;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: background 0.3s;
     }
 
     .content-frame {
       width: 100%;
       height: 100%;
       border: none;
-      background: white;
+      background: #0f121c;
+      transition: opacity 0.4s ease;
     }
 
-    /* splash / hub feed */
+    /* splash / hub */
     .splash {
       display: flex;
       flex-direction: column;
@@ -265,47 +310,65 @@
       justify-content: flex-start;
       height: 100%;
       width: 100%;
-      background: #f8fafc;
-      color: #1e293b;
+      background: rgba(8, 10, 16, 0.9);
+      color: #e8edf5;
       padding: 30px 24px;
       text-align: center;
       overflow-y: auto;
-      transition: background 0.25s;
+      backdrop-filter: blur(6px);
+      animation: fadeGlow 0.7s ease;
+    }
+    @keyframes fadeGlow {
+      0% { opacity: 0; filter: blur(4px); }
+      100% { opacity: 1; filter: blur(0); }
     }
     .splash i {
       font-size: 4rem;
       color: var(--accent);
       margin-bottom: 16px;
-      opacity: 0.8;
-      transition: color 0.25s;
+      opacity: 0.9;
+      transition: color 0.3s, transform 0.3s;
+      animation: iconFloat 4s ease-in-out infinite;
+    }
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
     .splash h2 {
       font-weight: 600;
-      font-size: 1.7rem;
+      font-size: 1.8rem;
       letter-spacing: -0.5px;
       margin-bottom: 6px;
+      background: linear-gradient(135deg, #f0f4ff, #90a0c0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .splash .sub {
-      color: #475569;
+      color: #a0b0c8;
       max-width: 480px;
       line-height: 1.5;
       margin-bottom: 20px;
     }
+
     .update-feed {
       width: 100%;
       max-width: 560px;
-      background: white;
+      background: rgba(16, 20, 30, 0.7);
+      backdrop-filter: blur(8px);
       border-radius: 20px;
       padding: 16px 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       text-align: left;
-      border: 1px solid #e9edf2;
-      margin-top: 6px;
-      animation: slideUp 0.5s ease;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      animation: slideUp 0.6s ease;
+    }
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(18px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
     .update-feed h4 {
       font-size: 0.9rem;
-      color: #1e293b;
+      color: #d0dcec;
       margin-bottom: 12px;
       display: flex;
       align-items: center;
@@ -316,33 +379,41 @@
       align-items: center;
       gap: 12px;
       padding: 10px 0;
-      border-bottom: 1px solid #f1f4f8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       font-size: 0.9rem;
-      animation: fadeItem 0.4s ease;
+      animation: fadeItem 0.5s ease;
+      color: #d0dcec;
     }
     .update-item:last-child { border-bottom: none; }
     .update-item i {
       font-size: 1rem;
       width: 24px;
       color: var(--accent);
-      transition: color 0.25s;
+      transition: color 0.3s;
     }
     .update-item .time {
       margin-left: auto;
       font-size: 0.7rem;
-      color: #94a3b8;
+      color: #708098;
     }
+    @keyframes fadeItem {
+      0% { opacity: 0; transform: translateX(-8px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
     .badge {
       margin-top: 16px;
-      background: #e2e8f0;
+      background: rgba(255,255,255,0.04);
       padding: 6px 20px;
       border-radius: 60px;
       font-size: 0.8rem;
       font-weight: 500;
-      color: #1e293b;
+      color: #b0c0d8;
+      border: 1px solid rgba(255,255,255,0.04);
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      animation: fadeItem 0.8s ease;
     }
 
     /* status bar */
@@ -350,64 +421,14 @@
       background: var(--status-bg);
       padding: 5px 24px;
       font-size: 0.75rem;
-      color: #4a5a6e;
-      border-top: 1px solid #dce1e8;
+      color: #8a9ab0;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
       display: flex;
       justify-content: space-between;
-      letter-spacing: 0.2px;
-      transition: background 0.25s;
-    }
-    .status-bar span i { margin-right: 6px; opacity: 0.6; }
-
-    /* ----- animations ----- */
-    @keyframes tabFade {
-      0% { opacity: 0; transform: translateY(-4px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes slideUp {
-      0% { opacity: 0; transform: translateY(12px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeItem {
-      0% { opacity: 0; transform: translateX(-6px); }
-      100% { opacity: 1; transform: translateX(0); }
-    }
-
-    /* color picker (theme) */
-    .theme-picker {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 8px;
-      background: rgba(255,255,255,0.4);
-      padding: 4px 12px 4px 8px;
-      border-radius: 40px;
       backdrop-filter: blur(4px);
-      border: 1px solid rgba(0,0,0,0.04);
+      transition: background 0.3s;
     }
-    .theme-picker label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      color: #334155;
-      letter-spacing: 0.3px;
-    }
-    .theme-picker input[type="color"] {
-      width: 28px;
-      height: 28px;
-      border: none;
-      padding: 0;
-      background: transparent;
-      cursor: pointer;
-      border-radius: 40px;
-      border: 2px solid rgba(255,255,255,0.5);
-    }
-    .theme-picker input[type="color"]::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-    .theme-picker input[type="color"]::-webkit-color-swatch {
-      border: none;
-      border-radius: 40px;
-    }
+    .status-bar span i { margin-right: 6px; opacity: 0.5; }
 
     /* responsive */
     @media (max-width: 700px) {
@@ -447,18 +468,16 @@
 
       <div class="tool-icons">
         <i class="fas fa-star"></i>
-        <!-- theme picker -->
         <div class="theme-picker">
           <label><i class="fas fa-palette"></i></label>
-          <input type="color" id="themeColor" value="#2563eb" />
+          <input type="color" id="themeColor" value="#6c8cff" />
         </div>
         <i class="fas fa-ellipsis-v"></i>
       </div>
     </div>
 
-    <!-- browser body -->
+    <!-- body -->
     <div class="browser-body">
-      <!-- tabs -->
       <div class="tab-strip" id="tabStrip">
         <div class="tab active" data-tab="hub"><i class="fas fa-building"></i> Hub <span class="close-tab"><i class="fas fa-times"></i></span></div>
         <div class="tab" data-tab="github"><i class="fas fa-code"></i> GitHub <span class="close-tab"><i class="fas fa-times"></i></span></div>
@@ -466,10 +485,8 @@
         <div class="tab-add" id="addTabBtn"><i class="fas fa-plus-circle"></i></div>
       </div>
 
-      <!-- content area -->
       <div class="content-area" id="contentArea">
         <iframe class="content-frame" id="browserIframe" src="https://github.com" loading="lazy" allow="fullscreen"></iframe>
-        <!-- hub splash with updates feed -->
         <div class="splash" id="splashFallback" style="display: none;">
           <i class="fas fa-briefcase"></i>
           <h2>Corp Hub · Dashboard</h2>
@@ -482,21 +499,19 @@
             <div class="update-item"><i class="fas fa-star"></i> 12 new stars <span class="time">3h ago</span></div>
             <div class="update-item"><i class="fas fa-users"></i> 2 new contributors <span class="time">5h ago</span></div>
           </div>
-          <div class="badge"><i class="fas fa-github"></i> corp-hub/index.html · v2.0</div>
+          <div class="badge"><i class="fas fa-github"></i> corp-hub/index.html · v2.1</div>
         </div>
       </div>
     </div>
 
-    <!-- status bar -->
     <div class="status-bar" id="statusBar">
-      <span><i class="fas fa-shield-alt"></i> Secure · Corp Hub v2.0</span>
-      <span><i class="fas fa-circle" style="color:#22a67b; font-size: 0.5rem;"></i> <span id="statusText">GitHub ready</span></span>
+      <span><i class="fas fa-shield-alt"></i> Secure · Corp Hub v2.1</span>
+      <span><i class="fas fa-circle" style="color: var(--accent);"></i> <span id="statusText">Ready</span></span>
     </div>
   </div>
 
   <script>
     (function() {
-      // ----- DOM refs -----
       const iframe = document.getElementById('browserIframe');
       const urlInput = document.getElementById('urlInput');
       const splash = document.getElementById('splashFallback');
@@ -506,7 +521,7 @@
       const themeColorInput = document.getElementById('themeColor');
       const browserEl = document.getElementById('corpHubBrowser');
 
-      // ----- navigation -----
+      // ----- navigation with better error handling -----
       function navigateTo(url, updateStatus = true) {
         if (!url) return;
         let finalUrl = url.trim();
@@ -517,41 +532,40 @@
             finalUrl = 'https://github.com/search?q=' + encodeURIComponent(finalUrl);
           }
         }
-        try {
-          iframe.src = finalUrl;
-          urlInput.value = finalUrl;
-          iframe.style.display = 'block';
-          splash.style.display = 'none';
-          if (updateStatus) statusText.textContent = 'Loading...';
-          // optimistic status update after load
-          iframe.onload = function() {
-            statusText.textContent = 'Connected';
-            try {
-              const current = iframe.contentWindow?.location?.href;
-              if (current && current !== 'about:blank') urlInput.value = current;
-            } catch (e) {}
-          };
-          iframe.onerror = function() {
-            iframe.style.display = 'none';
-            splash.style.display = 'flex';
-            statusText.textContent = 'Error';
-            splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
-          };
-        } catch (e) {
+        // show iframe, hide splash
+        iframe.style.display = 'block';
+        splash.style.display = 'none';
+        iframe.src = finalUrl;
+        urlInput.value = finalUrl;
+        if (updateStatus) statusText.textContent = 'Loading…';
+        // iframe load / error
+        iframe.onload = function() {
+          statusText.textContent = 'Connected';
+          try {
+            const current = iframe.contentWindow?.location?.href;
+            if (current && current !== 'about:blank') urlInput.value = current;
+          } catch (e) { /* cross-origin */ }
+        };
+        iframe.onerror = function() {
           iframe.style.display = 'none';
           splash.style.display = 'flex';
           statusText.textContent = 'Error';
           splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
-        }
+        };
+        // fallback timeout
+        setTimeout(() => {
+          if (statusText.textContent === 'Loading…') {
+            statusText.textContent = 'Timeout';
+          }
+        }, 12000);
       }
 
-      // ----- show hub splash (with updates) -----
+      // ----- show hub splash -----
       function showHubSplash() {
         iframe.style.display = 'none';
         splash.style.display = 'flex';
         splash.querySelector('h2').textContent = 'Corp Hub · Dashboard';
         splash.querySelector('p.sub').innerHTML = 'Your custom browser for work & collaboration. Built with <i class="fas fa-heart" style="color:#ef4444;"></i> for GitHub.';
-        // ensure feed is visible
         let feed = document.getElementById('updateFeed');
         if (!feed) {
           const newFeed = document.createElement('div');
@@ -566,21 +580,18 @@
             <div class="update-item"><i class="fas fa-users"></i> 2 new contributors <span class="time">5h ago</span></div>
           `;
           splash.appendChild(newFeed);
-          // also ensure badge
           const badge = splash.querySelector('.badge');
           if (!badge) {
             const b = document.createElement('div');
             b.className = 'badge';
-            b.innerHTML = '<i class="fas fa-github"></i> corp-hub/index.html · v2.0';
+            b.innerHTML = '<i class="fas fa-github"></i> corp-hub/index.html · v2.1';
             splash.appendChild(b);
           }
         }
         statusText.textContent = 'Hub dashboard';
-        // update status with random live update
         updateFeedTime();
       }
 
-      // ----- update feed times randomly (animation) -----
       function updateFeedTime() {
         const items = document.querySelectorAll('.update-item .time');
         if (items.length) {
@@ -591,43 +602,35 @@
         }
       }
 
-      // ----- tab switching -----
+      // ----- tabs -----
       const tabs = document.querySelectorAll('.tab');
       tabs.forEach(tab => {
         tab.addEventListener('click', function(e) {
           if (e.target.closest('.close-tab')) return;
           tabs.forEach(t => t.classList.remove('active'));
           this.classList.add('active');
-          const tabType = this.dataset.tab || 'hub';
-          if (tabType === 'hub') {
-            showHubSplash();
-          } else if (tabType === 'github') {
-            navigateTo('https://github.com/trending');
-          } else if (tabType === 'explore') {
-            navigateTo('https://github.com/explore');
-          } else {
-            navigateTo('https://github.com');
-          }
+          const type = this.dataset.tab || 'hub';
+          if (type === 'hub') showHubSplash();
+          else if (type === 'github') navigateTo('https://github.com/trending');
+          else if (type === 'explore') navigateTo('https://github.com/explore');
+          else navigateTo('https://github.com');
         });
 
-        // close tab
-        const closeBtn = tab.querySelector('.close-tab');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function(e) {
+        const close = tab.querySelector('.close-tab');
+        if (close) {
+          close.addEventListener('click', function(e) {
             e.stopPropagation();
             const parent = this.closest('.tab');
             if (parent) {
               parent.style.display = 'none';
               if (parent.classList.contains('active')) {
-                const firstVisible = document.querySelector('.tab:not([style*="display: none"])');
-                if (firstVisible) {
-                  firstVisible.classList.add('active');
-                  const type = firstVisible.dataset.tab || 'hub';
-                  if (type === 'hub') showHubSplash();
+                const first = document.querySelector('.tab:not([style*="display: none"])');
+                if (first) {
+                  first.classList.add('active');
+                  const t = first.dataset.tab || 'hub';
+                  if (t === 'hub') showHubSplash();
                   else navigateTo('https://github.com');
-                } else {
-                  showHubSplash();
-                }
+                } else showHubSplash();
               }
             }
           });
@@ -646,7 +649,6 @@
         newTab.classList.add('active');
         showHubSplash();
 
-        // close
         const close = newTab.querySelector('.close-tab');
         if (close) {
           close.addEventListener('click', function(e) {
@@ -664,7 +666,6 @@
             }
           });
         }
-        // switch
         newTab.addEventListener('click', function(e) {
           if (e.target.closest('.close-tab')) return;
           tabs.forEach(t => t.classList.remove('active'));
@@ -673,18 +674,13 @@
         });
       });
 
-      // ----- URL bar enter -----
+      // ----- url bar enter -----
       urlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          navigateTo(urlInput.value);
-        }
+        if (e.key === 'Enter') { e.preventDefault(); navigateTo(urlInput.value); }
       });
 
-      // ----- lock icon -> github -----
       lockIcon.addEventListener('click', () => navigateTo('https://github.com'));
 
-      // ----- nav icons -----
       document.getElementById('navBack').addEventListener('click', () => navigateTo('https://github.com'));
       document.getElementById('navForward').addEventListener('click', () => navigateTo('https://github.com/explore'));
       document.getElementById('navRefresh').addEventListener('click', () => {
@@ -692,31 +688,26 @@
         else navigateTo('https://github.com');
       });
 
-      // ----- theme / color picker -----
+      // ----- theme -----
       themeColorInput.addEventListener('input', function(e) {
         const color = e.target.value;
         browserEl.style.setProperty('--accent', color);
-        browserEl.style.setProperty('--accent-light', color + '99');
-        // also update header/tab strip subtle
+        browserEl.style.setProperty('--accent-glow', color + '44');
         document.querySelector('.brand i').style.color = color;
         document.querySelectorAll('.update-item i').forEach(el => el.style.color = color);
         document.querySelector('.splash i').style.color = color;
-        // update status dot
         document.querySelector('.status-bar .fa-circle').style.color = color;
+        // active tab border
+        document.querySelectorAll('.tab.active').forEach(t => t.style.borderBottomColor = color);
       });
 
-      // ----- initial load: show hub splash with updates (instead of iframe) -----
-      // we want the hub tab active by default
+      // ----- init: hub splash active -----
       setTimeout(() => {
-        const activeTab = document.querySelector('.tab.active');
-        if (activeTab && activeTab.dataset.tab === 'hub') {
-          showHubSplash();
-        } else {
-          navigateTo('https://github.com');
-        }
-        // animate updates every 6s
-        setInterval(updateFeedTime, 6000);
-      }, 150);
+        const active = document.querySelector('.tab.active');
+        if (active && active.dataset.tab === 'hub') showHubSplash();
+        else navigateTo('https://github.com');
+        setInterval(updateFeedTime, 5000);
+      }, 200);
 
       // iframe error fallback
       iframe.addEventListener('error', function() {
@@ -726,11 +717,10 @@
         splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
       });
 
-      // also if iframe loads, but we want hub to stay if hub tab active
+      // if load but hub active -> keep splash
       iframe.addEventListener('load', function() {
         const active = document.querySelector('.tab.active');
         if (active && active.dataset.tab === 'hub') {
-          // if hub is active, keep splash
           showHubSplash();
         } else {
           iframe.style.display = 'block';
