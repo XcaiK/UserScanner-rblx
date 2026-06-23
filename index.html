@@ -21,6 +21,7 @@
       align-items: center;
       min-height: 100vh;
       padding: 20px;
+      transition: background 0.25s ease;
     }
 
     /* main browser window — corp hub */
@@ -28,19 +29,30 @@
       width: 1300px;
       max-width: 100%;
       height: 90vh;
-      max-height: 800px;
+      max-height: 820px;
       background: #f5f7fb;
       border-radius: 28px;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: all 0.2s ease;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* theme color variables (dynamically updated via JS) */
+    .browser {
+      --accent: #2563eb;
+      --accent-light: #3b82f6;
+      --header-bg: #eef1f5;
+      --tab-bg: #d6dde6;
+      --tab-active: white;
+      --status-bg: #eef1f5;
+      --url-border: #dce1e8;
     }
 
     /* ----- title bar / header ----- */
     .browser-header {
-      background: #eef1f5;
+      background: var(--header-bg);
       padding: 14px 20px 12px 20px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       display: flex;
@@ -48,6 +60,7 @@
       gap: 16px;
       flex-wrap: wrap;
       backdrop-filter: blur(2px);
+      transition: background 0.25s ease;
     }
 
     .window-controls {
@@ -79,8 +92,9 @@
       margin-left: 4px;
     }
     .brand i {
-      color: #2563eb;
+      color: var(--accent);
       font-size: 1.2rem;
+      transition: color 0.25s;
     }
     .brand span {
       background: linear-gradient(145deg, #1e293b, #0f172a);
@@ -115,11 +129,11 @@
       min-width: 200px;
       height: 44px;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0,0,0,0.02);
-      border: 1px solid #dce1e8;
-      transition: 0.15s;
+      border: 1px solid var(--url-border);
+      transition: 0.15s, border-color 0.25s;
     }
     .url-bar:focus-within {
-      border-color: #2563eb;
+      border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), inset 0 1px 3px rgba(0,0,0,0.02);
     }
     .url-bar i {
@@ -146,6 +160,7 @@
       margin-left: auto;
       color: #22a67b;
       font-size: 0.8rem;
+      cursor: pointer;
     }
 
     /* quick tools (right of url) */
@@ -181,9 +196,10 @@
       display: flex;
       gap: 4px;
       border-bottom: 1px solid #d0d7e0;
+      transition: background 0.25s;
     }
     .tab {
-      background: #d6dde6;
+      background: var(--tab-bg);
       padding: 8px 18px 8px 16px;
       border-radius: 12px 12px 0 0;
       font-size: 0.85rem;
@@ -195,19 +211,20 @@
       cursor: default;
       border: 1px solid transparent;
       border-bottom: none;
-      transition: 0.1s;
+      transition: 0.15s, background 0.2s;
       letter-spacing: -0.2px;
+      animation: tabFade 0.2s ease;
     }
     .tab.active {
-      background: white;
+      background: var(--tab-active);
       border-color: #d0d7e0;
-      border-bottom: 2px solid white;
+      border-bottom: 2px solid var(--tab-active);
       color: #0b1e33;
       font-weight: 600;
       box-shadow: 0 -2px 4px rgba(0,0,0,0.02);
     }
     .tab i { font-size: 0.75rem; opacity: 0.6; }
-    .tab .close-tab { margin-left: 6px; opacity: 0.4; }
+    .tab .close-tab { margin-left: 6px; opacity: 0.4; cursor: pointer; }
     .tab .close-tab:hover { opacity: 1; }
 
     .tab-add {
@@ -222,7 +239,7 @@
     }
     .tab-add:hover { opacity: 1; }
 
-    /* iframe / content area */
+    /* content area */
     .content-area {
       flex: 1;
       background: #f2f5f9;
@@ -230,6 +247,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.2s;
     }
 
     .content-frame {
@@ -239,42 +257,87 @@
       background: white;
     }
 
-    /* fallback / welcome splash (shown when no iframe) */
+    /* splash / hub feed */
     .splash {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       height: 100%;
       width: 100%;
       background: #f8fafc;
       color: #1e293b;
-      padding: 30px;
+      padding: 30px 24px;
       text-align: center;
+      overflow-y: auto;
+      transition: background 0.25s;
     }
     .splash i {
-      font-size: 4.5rem;
-      color: #2563eb;
-      margin-bottom: 20px;
-      opacity: 0.7;
+      font-size: 4rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+      opacity: 0.8;
+      transition: color 0.25s;
     }
     .splash h2 {
       font-weight: 600;
       font-size: 1.7rem;
       letter-spacing: -0.5px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .splash p {
+    .splash .sub {
       color: #475569;
-      max-width: 380px;
+      max-width: 480px;
       line-height: 1.5;
+      margin-bottom: 20px;
     }
-    .splash .badge {
-      margin-top: 20px;
+    .update-feed {
+      width: 100%;
+      max-width: 560px;
+      background: white;
+      border-radius: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      text-align: left;
+      border: 1px solid #e9edf2;
+      margin-top: 6px;
+      animation: slideUp 0.5s ease;
+    }
+    .update-feed h4 {
+      font-size: 0.9rem;
+      color: #1e293b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .update-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f4f8;
+      font-size: 0.9rem;
+      animation: fadeItem 0.4s ease;
+    }
+    .update-item:last-child { border-bottom: none; }
+    .update-item i {
+      font-size: 1rem;
+      width: 24px;
+      color: var(--accent);
+      transition: color 0.25s;
+    }
+    .update-item .time {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+    .badge {
+      margin-top: 16px;
       background: #e2e8f0;
-      padding: 8px 24px;
+      padding: 6px 20px;
       border-radius: 60px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 500;
       color: #1e293b;
       display: inline-flex;
@@ -282,9 +345,9 @@
       gap: 8px;
     }
 
-    /* status bar (minimal) */
+    /* status bar */
     .status-bar {
-      background: #eef1f5;
+      background: var(--status-bg);
       padding: 5px 24px;
       font-size: 0.75rem;
       color: #4a5a6e;
@@ -292,14 +355,66 @@
       display: flex;
       justify-content: space-between;
       letter-spacing: 0.2px;
+      transition: background 0.25s;
     }
     .status-bar span i { margin-right: 6px; opacity: 0.6; }
 
-    /* responsiveness */
+    /* ----- animations ----- */
+    @keyframes tabFade {
+      0% { opacity: 0; transform: translateY(-4px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeItem {
+      0% { opacity: 0; transform: translateX(-6px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    /* color picker (theme) */
+    .theme-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+      background: rgba(255,255,255,0.4);
+      padding: 4px 12px 4px 8px;
+      border-radius: 40px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .theme-picker label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #334155;
+      letter-spacing: 0.3px;
+    }
+    .theme-picker input[type="color"] {
+      width: 28px;
+      height: 28px;
+      border: none;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .theme-picker input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    .theme-picker input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 40px;
+    }
+
+    /* responsive */
     @media (max-width: 700px) {
       .brand span { font-size: 0.9rem; }
       .url-bar { height: 38px; }
       .tab { padding: 6px 12px; font-size: 0.75rem; }
+      .theme-picker label { display: none; }
     }
   </style>
 </head>
@@ -319,168 +434,199 @@
       </div>
 
       <div class="nav-actions">
-        <i class="fas fa-chevron-left"></i>
-        <i class="fas fa-chevron-right"></i>
-        <i class="fas fa-sync-alt"></i>
+        <i class="fas fa-chevron-left" id="navBack"></i>
+        <i class="fas fa-chevron-right" id="navForward"></i>
+        <i class="fas fa-sync-alt" id="navRefresh"></i>
       </div>
 
       <div class="url-bar" id="urlBar">
         <i class="fas fa-search"></i>
         <input type="text" id="urlInput" placeholder="Search or enter address…" value="https://github.com" />
-        <span class="lock-icon"><i class="fas fa-lock"></i></span>
+        <span class="lock-icon" id="lockIcon"><i class="fas fa-lock"></i></span>
       </div>
 
       <div class="tool-icons">
         <i class="fas fa-star"></i>
+        <!-- theme picker -->
+        <div class="theme-picker">
+          <label><i class="fas fa-palette"></i></label>
+          <input type="color" id="themeColor" value="#2563eb" />
+        </div>
         <i class="fas fa-ellipsis-v"></i>
       </div>
     </div>
 
     <!-- browser body -->
     <div class="browser-body">
-      <!-- tabs (corp hub style) -->
-      <div class="tab-strip">
-        <div class="tab active"><i class="fas fa-building"></i> Hub <span class="close-tab"><i class="fas fa-times"></i></span></div>
-        <div class="tab"><i class="fas fa-code"></i> GitHub <span class="close-tab"><i class="fas fa-times"></i></span></div>
-        <div class="tab"><i class="fas fa-globe"></i> Explore <span class="close-tab"><i class="fas fa-times"></i></span></div>
-        <div class="tab-add"><i class="fas fa-plus-circle"></i></div>
+      <!-- tabs -->
+      <div class="tab-strip" id="tabStrip">
+        <div class="tab active" data-tab="hub"><i class="fas fa-building"></i> Hub <span class="close-tab"><i class="fas fa-times"></i></span></div>
+        <div class="tab" data-tab="github"><i class="fas fa-code"></i> GitHub <span class="close-tab"><i class="fas fa-times"></i></span></div>
+        <div class="tab" data-tab="explore"><i class="fas fa-globe"></i> Explore <span class="close-tab"><i class="fas fa-times"></i></span></div>
+        <div class="tab-add" id="addTabBtn"><i class="fas fa-plus-circle"></i></div>
       </div>
 
-      <!-- content: iframe loads github by default (Corp Hub) -->
+      <!-- content area -->
       <div class="content-area" id="contentArea">
-        <!-- we use an iframe to act as a "browser" inside the browser -->
         <iframe class="content-frame" id="browserIframe" src="https://github.com" loading="lazy" allow="fullscreen"></iframe>
-        <!-- splash hidden by default (shown only if iframe fails) -->
+        <!-- hub splash with updates feed -->
         <div class="splash" id="splashFallback" style="display: none;">
           <i class="fas fa-briefcase"></i>
-          <h2>Corp Hub</h2>
-          <p>Your custom browser for work & collaboration. <br>Built with <i class="fas fa-heart" style="color:#ef4444;"></i> for GitHub.</p>
-          <div class="badge"><i class="fas fa-github"></i> corp-hub/index.html</div>
+          <h2>Corp Hub · Dashboard</h2>
+          <p class="sub">Your custom browser for work & collaboration. Built with <i class="fas fa-heart" style="color:#ef4444;"></i> for GitHub.</p>
+          <div class="update-feed" id="updateFeed">
+            <h4><i class="fas fa-rss"></i> Live updates</h4>
+            <div class="update-item"><i class="fas fa-code-branch"></i> repo: corp-hub updated <span class="time">2 min ago</span></div>
+            <div class="update-item"><i class="fas fa-pull-request"></i> PR #42 merged <span class="time">18 min ago</span></div>
+            <div class="update-item"><i class="fas fa-issue"></i> 3 new issues opened <span class="time">1h ago</span></div>
+            <div class="update-item"><i class="fas fa-star"></i> 12 new stars <span class="time">3h ago</span></div>
+            <div class="update-item"><i class="fas fa-users"></i> 2 new contributors <span class="time">5h ago</span></div>
+          </div>
+          <div class="badge"><i class="fas fa-github"></i> corp-hub/index.html · v2.0</div>
         </div>
       </div>
     </div>
 
     <!-- status bar -->
-    <div class="status-bar">
-      <span><i class="fas fa-shield-alt"></i> Secure · Corp Hub v1.0</span>
-      <span><i class="fas fa-circle" style="color:#22a67b; font-size: 0.5rem;"></i> GitHub ready</span>
+    <div class="status-bar" id="statusBar">
+      <span><i class="fas fa-shield-alt"></i> Secure · Corp Hub v2.0</span>
+      <span><i class="fas fa-circle" style="color:#22a67b; font-size: 0.5rem;"></i> <span id="statusText">GitHub ready</span></span>
     </div>
   </div>
 
   <script>
     (function() {
+      // ----- DOM refs -----
       const iframe = document.getElementById('browserIframe');
       const urlInput = document.getElementById('urlInput');
       const splash = document.getElementById('splashFallback');
       const contentArea = document.getElementById('contentArea');
+      const statusText = document.getElementById('statusText');
+      const lockIcon = document.getElementById('lockIcon');
+      const themeColorInput = document.getElementById('themeColor');
+      const browserEl = document.getElementById('corpHubBrowser');
 
-      // ----- helper: update iframe src -----
-      function navigateTo(url) {
+      // ----- navigation -----
+      function navigateTo(url, updateStatus = true) {
         if (!url) return;
         let finalUrl = url.trim();
-
-        // if no protocol, add https://
         if (!/^https?:\/\//i.test(finalUrl)) {
-          // if it looks like a domain (contains dot) or just a search term
           if (finalUrl.includes('.') || finalUrl.startsWith('localhost') || finalUrl.startsWith('127.0.0.1')) {
             finalUrl = 'https://' + finalUrl;
           } else {
-            // treat as search (google fallback)
             finalUrl = 'https://github.com/search?q=' + encodeURIComponent(finalUrl);
           }
         }
-
-        // update iframe
         try {
           iframe.src = finalUrl;
-          // update url bar
           urlInput.value = finalUrl;
-          // hide splash, show iframe
           iframe.style.display = 'block';
           splash.style.display = 'none';
+          if (updateStatus) statusText.textContent = 'Loading...';
+          // optimistic status update after load
+          iframe.onload = function() {
+            statusText.textContent = 'Connected';
+            try {
+              const current = iframe.contentWindow?.location?.href;
+              if (current && current !== 'about:blank') urlInput.value = current;
+            } catch (e) {}
+          };
+          iframe.onerror = function() {
+            iframe.style.display = 'none';
+            splash.style.display = 'flex';
+            statusText.textContent = 'Error';
+            splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
+          };
         } catch (e) {
-          // fallback: show splash with error
           iframe.style.display = 'none';
           splash.style.display = 'flex';
-          splash.querySelector('p').innerHTML = '⚠️ Could not load page. <br> Try a different address.';
+          statusText.textContent = 'Error';
+          splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
         }
       }
 
-      // ----- event listeners -----
-      // Enter key in URL bar
-      urlInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          navigateTo(urlInput.value);
-        }
-      });
-
-      // click on lock icon or search icon -> reload / navigate to github
-      document.querySelector('.lock-icon')?.addEventListener('click', () => {
-        navigateTo('https://github.com');
-      });
-
-      // click on nav icons (demo: back/forward/refresh)
-      const navIcons = document.querySelectorAll('.nav-actions i');
-      if (navIcons.length >= 3) {
-        // back: just reload github (demo)
-        navIcons[0].addEventListener('click', () => navigateTo('https://github.com'));
-        // forward: github explore
-        navIcons[1].addEventListener('click', () => navigateTo('https://github.com/explore'));
-        // refresh: reload current
-        navIcons[2].addEventListener('click', () => {
-          if (iframe.src) {
-            iframe.src = iframe.src;
-          } else {
-            navigateTo('https://github.com');
+      // ----- show hub splash (with updates) -----
+      function showHubSplash() {
+        iframe.style.display = 'none';
+        splash.style.display = 'flex';
+        splash.querySelector('h2').textContent = 'Corp Hub · Dashboard';
+        splash.querySelector('p.sub').innerHTML = 'Your custom browser for work & collaboration. Built with <i class="fas fa-heart" style="color:#ef4444;"></i> for GitHub.';
+        // ensure feed is visible
+        let feed = document.getElementById('updateFeed');
+        if (!feed) {
+          const newFeed = document.createElement('div');
+          newFeed.className = 'update-feed';
+          newFeed.id = 'updateFeed';
+          newFeed.innerHTML = `
+            <h4><i class="fas fa-rss"></i> Live updates</h4>
+            <div class="update-item"><i class="fas fa-code-branch"></i> repo: corp-hub updated <span class="time">2 min ago</span></div>
+            <div class="update-item"><i class="fas fa-pull-request"></i> PR #42 merged <span class="time">18 min ago</span></div>
+            <div class="update-item"><i class="fas fa-issue"></i> 3 new issues opened <span class="time">1h ago</span></div>
+            <div class="update-item"><i class="fas fa-star"></i> 12 new stars <span class="time">3h ago</span></div>
+            <div class="update-item"><i class="fas fa-users"></i> 2 new contributors <span class="time">5h ago</span></div>
+          `;
+          splash.appendChild(newFeed);
+          // also ensure badge
+          const badge = splash.querySelector('.badge');
+          if (!badge) {
+            const b = document.createElement('div');
+            b.className = 'badge';
+            b.innerHTML = '<i class="fas fa-github"></i> corp-hub/index.html · v2.0';
+            splash.appendChild(b);
           }
-        });
+        }
+        statusText.textContent = 'Hub dashboard';
+        // update status with random live update
+        updateFeedTime();
       }
 
-      // tab switching (demo: just visual + change url)
-      const tabs = document.querySelectorAll('.tab');
-      tabs.forEach((tab, index) => {
-        tab.addEventListener('click', function(e) {
-          // don't trigger if close clicked
-          if (e.target.closest('.close-tab')) return;
+      // ----- update feed times randomly (animation) -----
+      function updateFeedTime() {
+        const items = document.querySelectorAll('.update-item .time');
+        if (items.length) {
+          const times = ['now', '1 min ago', '3 min ago', '8 min ago', '15 min ago', '22 min ago', '42 min ago', '1h ago', '2h ago'];
+          items.forEach((el, idx) => {
+            el.textContent = times[(idx + Math.floor(Math.random() * 3)) % times.length];
+          });
+        }
+      }
 
-          // remove active from all
+      // ----- tab switching -----
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+          if (e.target.closest('.close-tab')) return;
           tabs.forEach(t => t.classList.remove('active'));
           this.classList.add('active');
-
-          // change content based on tab (demo)
-          const tabText = this.innerText.toLowerCase();
-          if (tabText.includes('hub')) {
-            navigateTo('https://github.com');
-          } else if (tabText.includes('github')) {
+          const tabType = this.dataset.tab || 'hub';
+          if (tabType === 'hub') {
+            showHubSplash();
+          } else if (tabType === 'github') {
             navigateTo('https://github.com/trending');
-          } else if (tabText.includes('explore')) {
+          } else if (tabType === 'explore') {
             navigateTo('https://github.com/explore');
           } else {
             navigateTo('https://github.com');
           }
         });
 
-        // close tab (demo: hide tab)
+        // close tab
         const closeBtn = tab.querySelector('.close-tab');
         if (closeBtn) {
           closeBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            const parentTab = this.closest('.tab');
-            if (parentTab) {
-              parentTab.style.display = 'none';
-              // if it was active, activate first visible tab
-              if (parentTab.classList.contains('active')) {
+            const parent = this.closest('.tab');
+            if (parent) {
+              parent.style.display = 'none';
+              if (parent.classList.contains('active')) {
                 const firstVisible = document.querySelector('.tab:not([style*="display: none"])');
                 if (firstVisible) {
                   firstVisible.classList.add('active');
-                  // load github
-                  navigateTo('https://github.com');
+                  const type = firstVisible.dataset.tab || 'hub';
+                  if (type === 'hub') showHubSplash();
+                  else navigateTo('https://github.com');
                 } else {
-                  // no tabs: show splash
-                  iframe.style.display = 'none';
-                  splash.style.display = 'flex';
-                  splash.querySelector('p').innerHTML = 'No tabs open. <br> Click <i class="fas fa-plus-circle"></i> to add.';
+                  showHubSplash();
                 }
               }
             }
@@ -488,77 +634,111 @@
         }
       });
 
-      // "add tab" (demo: create new tab clone)
-      const addTabBtn = document.querySelector('.tab-add');
-      if (addTabBtn) {
-        addTabBtn.addEventListener('click', function() {
-          const tabStrip = document.querySelector('.tab-strip');
-          const newTab = document.createElement('div');
-          newTab.className = 'tab';
-          newTab.innerHTML = `<i class="fas fa-file"></i> New <span class="close-tab"><i class="fas fa-times"></i></span>`;
-          // insert before add button
-          tabStrip.insertBefore(newTab, this);
+      // ----- add tab -----
+      document.getElementById('addTabBtn').addEventListener('click', function() {
+        const strip = document.getElementById('tabStrip');
+        const newTab = document.createElement('div');
+        newTab.className = 'tab';
+        newTab.dataset.tab = 'custom';
+        newTab.innerHTML = `<i class="fas fa-file"></i> New <span class="close-tab"><i class="fas fa-times"></i></span>`;
+        strip.insertBefore(newTab, this);
+        tabs.forEach(t => t.classList.remove('active'));
+        newTab.classList.add('active');
+        showHubSplash();
 
-          // make it active
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          newTab.classList.add('active');
-          navigateTo('https://github.com');
-
-          // attach close event
-          const close = newTab.querySelector('.close-tab');
-          if (close) {
-            close.addEventListener('click', function(e) {
-              e.stopPropagation();
-              const parent = this.closest('.tab');
-              if (parent) {
-                parent.style.display = 'none';
-                if (parent.classList.contains('active')) {
-                  const firstVis = document.querySelector('.tab:not([style*="display: none"])');
-                  if (firstVis) { firstVis.classList.add('active'); navigateTo('https://github.com'); }
-                  else {
-                    iframe.style.display = 'none';
-                    splash.style.display = 'flex';
-                    splash.querySelector('p').innerHTML = 'No tabs open. <br> Click <i class="fas fa-plus-circle"></i> to add.';
-                  }
-                }
+        // close
+        const close = newTab.querySelector('.close-tab');
+        if (close) {
+          close.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const p = this.closest('.tab');
+            if (p) {
+              p.style.display = 'none';
+              if (p.classList.contains('active')) {
+                const first = document.querySelector('.tab:not([style*="display: none"])');
+                if (first) { first.classList.add('active'); 
+                  const t = first.dataset.tab || 'hub';
+                  if (t === 'hub') showHubSplash(); else navigateTo('https://github.com');
+                } else showHubSplash();
               }
-            });
-          }
-
-          // click to switch
-          newTab.addEventListener('click', function(e) {
-            if (e.target.closest('.close-tab')) return;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            navigateTo('https://github.com');
+            }
           });
+        }
+        // switch
+        newTab.addEventListener('click', function(e) {
+          if (e.target.closest('.close-tab')) return;
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          showHubSplash();
         });
-      }
+      });
 
-      // if iframe fails to load (e.g., CORS or network) show splash
+      // ----- URL bar enter -----
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          navigateTo(urlInput.value);
+        }
+      });
+
+      // ----- lock icon -> github -----
+      lockIcon.addEventListener('click', () => navigateTo('https://github.com'));
+
+      // ----- nav icons -----
+      document.getElementById('navBack').addEventListener('click', () => navigateTo('https://github.com'));
+      document.getElementById('navForward').addEventListener('click', () => navigateTo('https://github.com/explore'));
+      document.getElementById('navRefresh').addEventListener('click', () => {
+        if (iframe.src) iframe.src = iframe.src;
+        else navigateTo('https://github.com');
+      });
+
+      // ----- theme / color picker -----
+      themeColorInput.addEventListener('input', function(e) {
+        const color = e.target.value;
+        browserEl.style.setProperty('--accent', color);
+        browserEl.style.setProperty('--accent-light', color + '99');
+        // also update header/tab strip subtle
+        document.querySelector('.brand i').style.color = color;
+        document.querySelectorAll('.update-item i').forEach(el => el.style.color = color);
+        document.querySelector('.splash i').style.color = color;
+        // update status dot
+        document.querySelector('.status-bar .fa-circle').style.color = color;
+      });
+
+      // ----- initial load: show hub splash with updates (instead of iframe) -----
+      // we want the hub tab active by default
+      setTimeout(() => {
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab && activeTab.dataset.tab === 'hub') {
+          showHubSplash();
+        } else {
+          navigateTo('https://github.com');
+        }
+        // animate updates every 6s
+        setInterval(updateFeedTime, 6000);
+      }, 150);
+
+      // iframe error fallback
       iframe.addEventListener('error', function() {
         iframe.style.display = 'none';
         splash.style.display = 'flex';
-        splash.querySelector('p').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
+        statusText.textContent = 'Error';
+        splash.querySelector('p.sub').innerHTML = '⚠️ Unable to load page. <br> Try a different address.';
       });
 
-      // if iframe loads successfully, ensure splash hidden
+      // also if iframe loads, but we want hub to stay if hub tab active
       iframe.addEventListener('load', function() {
-        iframe.style.display = 'block';
-        splash.style.display = 'none';
-        // update url bar with current src (may differ due to redirects)
-        try {
-          const currentSrc = iframe.contentWindow?.location?.href;
-          if (currentSrc && currentSrc !== 'about:blank') {
-            urlInput.value = currentSrc;
-          }
-        } catch (e) { /* cross-origin, ignore */ }
+        const active = document.querySelector('.tab.active');
+        if (active && active.dataset.tab === 'hub') {
+          // if hub is active, keep splash
+          showHubSplash();
+        } else {
+          iframe.style.display = 'block';
+          splash.style.display = 'none';
+          statusText.textContent = 'Connected';
+        }
       });
 
-      // manual trigger for initial load (github)
-      setTimeout(() => {
-        navigateTo('https://github.com');
-      }, 100);
     })();
   </script>
 </body>
